@@ -1,0 +1,1 @@
+/home/ciao/.dotfiles/arch/.vimrc
