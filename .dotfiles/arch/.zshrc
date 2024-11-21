@@ -24,3 +24,4 @@ source /home/ciao/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /home/ciao/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /home/ciao/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source /home/ciao/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /home/ciao/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
