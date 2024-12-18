@@ -1,0 +1,25 @@
+[general]
+import = ["~/.config/alacritty/custom.toml"]
+live_config_reload = true
+
+[window]
+padding = { x = 4, y = 4 }
+dynamic_padding = true
+decorations = "None"
+resize_increments = true
+opacity = 0.98
+blur = true
+
+[font]
+normal = { family = "JetBrainsMono", style = "Regular" }
+size = 12
+
+[cursor]
+style = { shape = "Beam", blinking = "Always" }
+thickness = 0.17
+
+[mouse]
+hide_when_typing = true
+
+[bell]
+animation = "EaseOutSine"
