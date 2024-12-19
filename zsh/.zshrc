@@ -130,3 +130,15 @@ alias gco='git checkout'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# -- SSH KEY ---
+# Start SSH agent !!
+if ! pgrep -u $USER ssh-agent > /dev/null; then
+    eval $(ssh-agent -s)
+fi
+
+# Add SSH key to agent !!
+ssh-add -q ~/.ssh/id_ed25519
+
+# Set GUI SSH agent for passphrase caching (KDE)
+export SSH_ASKPASS="/usr/bin/ksshaskpass"
