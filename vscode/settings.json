@@ -67,7 +67,7 @@
     ]
   },
 
-  "editor.fontSize": 12,
+  "editor.fontSize": 14,
   "editor.lineHeight": 20,
 
   "workbench.colorCustomizations": {
@@ -117,6 +117,7 @@
     "editorCursor.foreground": "#cc7832",
     "editorCursor.background": "#ffffffa5",
     "editorMultiCursor.primary.foreground": "#cc7832",
+    "terminalCursor.foreground": "#cc7832",
 
     // Breadcrumbs
     "breadcrumb.foreground": "#a9b7c6",
@@ -130,14 +131,6 @@
     "editor.snippetTabstopHighlightBorder": "#cc7832",
     "editor.snippetFinalTabstopHighlightBackground": "#ff6b6b",
     "editor.snippetFinalTabstopHighlightBorder": "#cc7832",
-
-    // Symbols
-    "editor.symbolHighlightBackground": "#ff8f8f33",
-    "editor.symbolHighlightBorder": "#cc7832",
-    "editor.wordHighlightBackground": "#ff6b6b33",
-    "editor.wordHighlightBorder": "#ff6b6b",
-    "editor.wordHighlightStrongBackground": "#4b222233",
-    "editor.wordHighlightStrongBorder": "#cc7832",
 
     // Settings
     "settings.dropdownBackground": "#1e1f22",
