@@ -1,16 +1,16 @@
 {
   "workbench.iconTheme": "vscode-icons",
-  "workbench.colorTheme": "Red",
+  // "workbench.colorTheme": "Red",
   "telemetry.telemetryLevel": "crash",
   "files.autoSave": "onFocusChange",
   "files.autoSaveDelay": 1000,
-  "editor.formatOnSave": true, // Disabled for open source to respect project formatting
-  "editor.formatOnType": false, // Disabled to prevent automatic formatting while typing
-  "editor.fontFamily": "'Recursive', 'JetBrains Mono', 'Fira Code', monospace",
-  "editor.fontWeight": "400",
+  "editor.formatOnSave": true,
+  "editor.formatOnType": false,
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Fira Code', 'Menlo', monospace",
+  // "editor.fontWeight": "400",
 
   // Enable font ligatures
-  "editor.fontLigatures": "'ss01','ss05', 'ss03', 'dlig','ss06','ss04','ss11','ss08','ss02','ss12','ss09','ss10'",
+  "editor.fontLigatures": "true",
   "editor.wordWrap": "on",
   "editor.minimap.enabled": true,
   "editor.minimap.showSlider": "always",
@@ -439,8 +439,8 @@
   "python.linting.pylintEnabled": true,
 
   "python.analysis.extraPaths": [
-    "~/Notebooks",
-    "~/Notebooks/math/python",
+    "~/Obsidian/clintaire/Notebooks",
+    "~/Obsidian/clintaire/Notebooks/math/python",
     "${workspaceFolder}/Python/Maths"
   ],
 
@@ -490,7 +490,7 @@
 
   // Better font rendering
 
-  "workbench.fontAliasing": "antialiased", // Better font clarity
+  "workbench.fontAliasing": "antialiased",
 
   // Enhanced debugging experience
 
@@ -575,14 +575,14 @@
   },
 
   "files.trimTrailingWhitespace": true,
-  "diffEditor.ignoreTrimWhitespace": false, // Stricter diff viewing
+  "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.renderSideBySide": true,
   "diffEditor.maxComputationTime": 5000,
 
   // Better workspace navigation
 
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.tree.indent": 20, // Slightly more spacing for better readability
+  "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "always",
   "explorer.compactFolders": false,
   "explorer.confirmDelete": false,
@@ -598,8 +598,8 @@
     "passphrase": ""
   },
 
-  "liveServer.settings.host": "localhost", // Security enhancement for Live Server
-  "liveServer.settings.NoBrowser": false, // Change to false to auto-open browser
+  "liveServer.settings.host": "localhost",
+  "liveServer.settings.NoBrowser": false,
   "liveServer.settings.fullReload": true,
   "liveServer.settings.wait": 100,
   "editor.linkedEditing": true,
@@ -625,10 +625,12 @@
 
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
-    "/usr/local/include",
+    "/opt/homebrew/include",
     "/usr/local/opt/eigen/include/eigen3",
     "${workspaceFolder}/C/includes"
-    // Removed "/opt/homebrew/include"
+
+    // MAC ==> "/opt/homebrew/include"
+    // Linux ==> "/usr/local/include"
   ],
 
   // Java math settings
@@ -651,8 +653,8 @@
 
   // Editor appearance
 
-  "editor.rulers": [100], // Single, less distracting line
-  "editor.renderWhitespace": "selection", // Only show whitespace when text is selected
+  "editor.rulers": [100],
+  "editor.renderWhitespace": "selection",
   "editor.semanticHighlighting.enabled": true,
 
   // Performance optimizations
@@ -919,20 +921,24 @@
   "workbench.statusBar.visible": true,
 
   "cSpell.userWords": [
+    "clintaire",
     "Airende",
     "Aire",
     "Airé",
     "Intelli",
     "rterm",
     "pytest",
+    "pdflatex",
     "nonstopmode",
     "filelineerror",
     "synctex",
     "interaction",
     "autoSave",
     "autoSaveDelay",
+    "lockb",
     "vmargs",
     "workspaceFolder",
+    "synctexjs",
     "ndarray",
     "nalgebra",
     "rpath",
@@ -945,6 +951,7 @@
     "Menlo",
     "autofetch",
     "autofetchPeriod",
+    "Scrollbars",
     "eigen",
     "jetbrains",
     "clippy",
@@ -954,11 +961,15 @@
     "pylint",
     "Pylance",
     "vsintellicode",
+    "texmf",
+    "DOCFILE",
     "Httpgd",
     "scrollback",
+    "ipynb",
     "sklearn",
     "matplotlib",
     "scipy",
+    "bibtex",
     "pycha",
     "latexmk",
     "pycache"
@@ -983,9 +994,13 @@
   "prettier.singleQuote": true,
   "prettier.tabWidth": 2,
 
-  // Update R settings for Linux
-  "r.rterm.linux": "/usr/bin/R",
-  "r.rpath.linux": "/usr/bin/R",
+  // R Linux Path
+  // "r.rterm.linux": "/usr/bin/R",
+  // "r.rpath.linux": "/usr/bin/R",
+
+  // R MacOS Path
+  "r.rterm.linux": "/opt/homebrew/bin/R",
+  "r.rpath.linux": "/opt/homebrew/bin/R",
 
   // Replace macOS terminal profiles with Linux
   "terminal.integrated.profiles.linux": {
@@ -996,6 +1011,9 @@
   },
   "terminal.integrated.defaultProfile.linux": "zsh (login)",
   "redhat.telemetry.enabled": true,
+
+  "ipynb.experimental.serialization": true,
+  "better-comments.highlightPlainText": true,
 
   "explorer.fileNesting.patterns": {
     "*.ts": "${capture}.js",
@@ -1012,9 +1030,18 @@
     "*.sdb": "${capture}.${extname}-*",
     "*.s3db": "${capture}.${extname}-*"
   },
+
+  // MacOS Kubernetes Path
   "vs-kubernetes": {
-    "vscode-kubernetes.kubectl-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/kubectl/kubectl",
-    "vscode-kubernetes.minikube-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/minikube/linux-arm64/minikube",
-    "vscode-kubernetes.helm-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/helm/linux-arm64/helm"
+    "vscode-kubernetes.kubectl-path-mac": "/Users/focus/.vs-kubernetes/tools/kubectl/kubectl",
+    "vscode-kubernetes.helm-path-mac": "/Users/focus/.vs-kubernetes/tools/helm/darwin-arm64/helm",
+    "vscode-kubernetes.minikube-path-mac": "/Users/focus/.vs-kubernetes/tools/minikube/darwin-arm64/minikube"
   }
+
+  // Linux Kubernetes Path
+  // "vs-kubernetes": {
+  // "vscode-kubernetes.kubectl-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/kubectl/kubectl",
+  // "vscode-kubernetes.minikube-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/minikube/linux-arm64/minikube",
+  // "vscode-kubernetes.helm-path-linux": "/home/freedom/.local/state/vs-kubernetes/tools/helm/linux-arm64/helm"
+  // },
 }
