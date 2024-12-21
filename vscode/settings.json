@@ -187,6 +187,7 @@
   "terminal.integrated.gpuAcceleration": "auto",
   "terminal.integrated.minimumContrastRatio": 4.5,
   "terminal.integrated.defaultProfile.osx": "zsh",
+
   "git.enableCommitSigning": true,
   "git.confirmSync": false,
   "git.gpgSign": true,
@@ -197,6 +198,10 @@
   "git.submitSignoff": true,
   "git.enableSmartCommit": true,
   "git.autoStash": true,
+
+  // MacOS GPG Path
+  "git.gpgPath": "/opt/homebrew/bin/gpg",
+
   "eslint.enable": true,
   "eslint.run": "onType",
   "eslint.validate": [
@@ -309,7 +314,7 @@
   "latex-workshop.view.pdf.internal.enabled": true,
   "latex-workshop.message.warning.show": false,
   "latex-workshop.message.error.show": false,
-  "latex-workshop.latex.autoBuild.run": "onSave",
+  "latex-workshop.latex.autoBuild.run": "onFileChange",
   "latex-workshop.latex.outDir": "%DIR%/out",
 
   "latex-workshop.latex.recipes": [
@@ -947,6 +952,7 @@
     "rhelp",
     "esbenp",
     "dlig",
+    "copilotmd",
     "Fira",
     "Menlo",
     "autofetch",
@@ -1036,6 +1042,10 @@
     "vscode-kubernetes.kubectl-path-mac": "/Users/focus/.vs-kubernetes/tools/kubectl/kubectl",
     "vscode-kubernetes.helm-path-mac": "/Users/focus/.vs-kubernetes/tools/helm/darwin-arm64/helm",
     "vscode-kubernetes.minikube-path-mac": "/Users/focus/.vs-kubernetes/tools/minikube/darwin-arm64/minikube"
+  },
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "*.pdf": "latex-workshop-pdf-hook"
   }
 
   // Linux Kubernetes Path
