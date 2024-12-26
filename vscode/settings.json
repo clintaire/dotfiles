@@ -310,17 +310,17 @@
 
   // LaTeX Workshop settings
 
-  "latex-workshop.view.pdf.viewer": "tab",
-  "latex-workshop.view.pdf.internal.enabled": true,
+  // "latex-workshop.view.pdf.viewer": "tab",
   "latex-workshop.message.warning.show": false,
   "latex-workshop.message.error.show": false,
   "latex-workshop.latex.autoBuild.run": "onFileChange",
   "latex-workshop.latex.outDir": "%DIR%/out",
+  "latex-workshop.view.pdf.ref.viewer": "auto",
 
   "latex-workshop.latex.recipes": [
     {
       "name": "pdflatex",
-      "tools": ["pdflatex"]
+      "tools": ["xelatex"]
     },
 
     {
@@ -331,6 +331,11 @@
     {
       "name": "pdflatex -> bibtex -> pdflatex*2",
       "tools": ["pdflatex", "bibtex", "pdflatex", "pdflatex"]
+    },
+
+    {
+      "name": "xelatex",
+      "tools": ["xelatex"]
     }
   ],
 
@@ -342,7 +347,8 @@
         "-synctex=1",
         "-interaction=nonstopmode",
         "-file-line-error",
-        "-output-directory=%OUTDIR%",
+        "-shell-escape",
+        "-output-directory=out",
         "%DOC%"
       ]
     },
@@ -364,6 +370,19 @@
       "name": "bibtex",
       "command": "bibtex",
       "args": ["%DOCFILE%"]
+    },
+
+    {
+      "name": "xelatex",
+      "command": "xelatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-shell-escape",
+        "-output-directory=%DIR%/out",
+        "%DOC%"
+      ]
     }
   ],
 
@@ -392,6 +411,29 @@
     "*.synctex(busy)",
     "*.synctex.gz(busy)",
     "*.nav",
+    "*.vrb",
+    ".aux",
+    ".bbl",
+    ".blg",
+    ".idx",
+    ".ind",
+    ".lof",
+    ".lot",
+    ".out",
+    ".toc",
+    ".acn",
+    ".acr",
+    ".alg",
+    ".glg",
+    ".glo",
+    ".gls",
+    ".fls",
+    ".log",
+    ".fdb_latexmk",
+    ".snm",
+    ".synctex(busy)",
+    ".synctex.gz(busy)",
+    ".nav",
     "*.vrb"
   ],
 
@@ -417,24 +459,42 @@
   "latex-workshop.latex.autoClean.run": "onBuilt",
   "latex-workshop.latex.clean.subfolder.enabled": true,
   "latex-workshop.view.pdf.internal.autoRefresh": true,
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.internal.enabled": true,
+  "latex-workshop.view.pdf.internal.continuous": true,
+  "latex-workshop.latex.watch.delay": 50,
+  "latex-workshop.view.pdf.refresh.method": "build",
+  "latex-workshop.latex.autoBuild.interval": 200,
+  "latex-workshop.latex.autoBuild.onFileChange.enabled": true,
 
   "latex-workshop.latex.watch.files.ignore": [
     "**/*.git/**",
     "**/build/**",
-    "**/node_modules/**"
+    "**/node_modules/**",
+    "**/out/**",
+    "/*.git/",
+    "/build/",
+    "/out/",
+    "/node_modules/"
   ],
 
   "latex-workshop.view.pdf.backgroundColor": "#ffffff",
   "latex-workshop.view.pdf.zoom": "auto",
+
+  "latex-workshop.view.pdf.color.light.pageColorsForeground": "",
+  "latex-workshop.view.pdf.color.light.pageColorsBackground": "",
+  "latex-workshop.view.pdf.color.light.pageBorderColor": "lightgrey",
+
+  "latex-workshop.view.pdf.color.dark.pageColorsForeground": "",
+  "latex-workshop.view.pdf.color.dark.pageColorsBackground": "",
+  "latex-workshop.view.pdf.color.dark.pageBorderColor": "darkgrey",
+
   "latex-workshop.view.pdf.internal.path": "%DIR%/out/%DOCFILE%.pdf",
 
   // IntelliCode settings
 
   "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
   "vsintellicode.features.python.deepLearning": "enabled",
-
-  // Python settings
-
   "python.defaultInterpreterPath": "~/.python-global/global-env/bin/python3",
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoSearchPaths": true,
@@ -626,20 +686,14 @@
 
   "rust-analyzer.cargo.features": ["nalgebra", "ndarray"],
 
-  // C/C++ math settings
+  // Java math settings
 
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
     "/opt/homebrew/include",
     "/usr/local/opt/eigen/include/eigen3",
     "${workspaceFolder}/C/includes"
-
-    // MAC ==> "/opt/homebrew/include"
-    // Linux ==> "/usr/local/include"
   ],
-
-  // Java math settings
-
   "java.project.referencedLibraries": [
     "lib/**/*.jar",
     "${workspaceFolder}/lib/commons-math3-3.6.1.jar"
@@ -949,6 +1003,7 @@
     "rpath",
     "rterm",
     "rworkspace",
+    "xelatex",
     "rhelp",
     "esbenp",
     "dlig",
@@ -977,6 +1032,12 @@
     "scipy",
     "bibtex",
     "pycha",
+    "pdf",
+    "darkgrey",
+    "lightgrey",
+    "singleton",
+    "dylib",
+    "tab",
     "latexmk",
     "pycache"
   ],
