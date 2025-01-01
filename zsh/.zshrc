@@ -79,13 +79,20 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git
-  npm
-  zsh-autosuggestions
-  zsh-syntax-highlighting
+    git
+    npm
+    node
+    pip
+    rust
+    gh
+    zsh-syntax-highlighting
+    zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
+
+# Antigen
+# antigen bundle zsh-users/zsh-autosuggestions
 
 # User configuration
 
@@ -115,29 +122,17 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-#
-# Aliases for development
-alias gs='git status'
-alias gl='git log --oneline'
-alias gd='git diff'
-alias gc='git commit'
-alias ga='git add'
-alias gco='git checkout'
-
-# Navigate to your projects quickly
-# alias projects='cd ~/folder'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-# -- SSH KEY ---
-# Start SSH agent !!
-if ! pgrep -u $USER ssh-agent > /dev/null; then
-    eval $(ssh-agent -s)
-fi
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Add SSH key to agent !!
-ssh-add -q ~/.ssh/id_ed25519
+alias ls='ls -G'
 
-# Set GUI SSH agent for passphrase caching (KDE)
-export SSH_ASKPASS="/usr/bin/ksshaskpass"
+export GPG_TTY=$(tty)
+
+# Created by `pipx` on 2024-12-22 02:09:36
+export PATH="$PATH:/Users/focus/.local/bin"

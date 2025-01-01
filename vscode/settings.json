@@ -1,6 +1,4 @@
 {
-  "workbench.iconTheme": "vscode-icons",
-  // "workbench.colorTheme": "Red",
   "telemetry.telemetryLevel": "crash",
   "files.autoSave": "onFocusChange",
   "files.autoSaveDelay": 1000,
@@ -685,9 +683,6 @@
   // Rust math settings
 
   "rust-analyzer.cargo.features": ["nalgebra", "ndarray"],
-
-  // Java math settings
-
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
     "/opt/homebrew/include",
