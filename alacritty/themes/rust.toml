@@ -1,3 +1,5 @@
+# rust.toml
+
 [colors.primary]
 background = "#353535"
 foreground = "#dddddd"

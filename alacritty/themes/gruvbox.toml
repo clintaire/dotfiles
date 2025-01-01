@@ -1,3 +1,5 @@
+# gruvbox.toml
+
 [colors.primary]
 background = "#3c3836"
 foreground = "#d4be98"

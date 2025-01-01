@@ -1,18 +1,20 @@
+# alacritty.toml
+
 [general]
-import = ["~/.config/alacritty/custom.toml"]
+import = ["~/.config/alacritty/themes/rust.toml"]
 live_config_reload = true
 
 [window]
-padding = { x = 4, y = 4 }
+padding = { x = 10, y = 10 }
 dynamic_padding = true
 decorations = "None"
 resize_increments = true
-opacity = 0.98
-blur = true
+opacity = 1.0
+# blur = true
 
 [font]
-normal = { family = "JetBrainsMono", style = "Regular" }
-size = 12
+normal = { family = "JetBrainsMonoNL Nerd Font", style = "Regular" }
+size = 14
 
 [cursor]
 style = { shape = "Beam", blinking = "Always" }
