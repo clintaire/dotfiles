@@ -4,7 +4,7 @@
   "files.autoSaveDelay": 1000,
   "editor.formatOnSave": true,
   "editor.formatOnType": false,
-  "editor.fontFamily": "'JetBrainsMono Nerd Font', 'Fira Code', 'Menlo', monospace",
+  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', 'Menlo', monospace",
   // "editor.fontWeight": "400",
 
   // Enable font ligatures
@@ -65,8 +65,7 @@
     ]
   },
 
-  "editor.fontSize": 14,
-  "editor.lineHeight": 20,
+  "editor.fontSize": 15.0,
 
   "workbench.colorCustomizations": {
     // Main UI elements
