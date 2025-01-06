@@ -13,8 +13,8 @@ opacity = 1.0
 # blur = true
 
 [font]
-normal = { family = "JetBrainsMonoNL Nerd Font", style = "Regular" }
-size = 14
+normal = { family = "JetBrains Mono ", style = "Regular" }
+size = 15
 
 [cursor]
 style = { shape = "Beam", blinking = "Always" }
