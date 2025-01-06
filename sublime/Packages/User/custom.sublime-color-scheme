@@ -1,0 +1,104 @@
+{
+  "variables": {
+    "background": "#1e1f22",
+    "foreground": "#a9b7c6",
+    "dim_foreground": "#787878",
+    "bright_foreground": "#a9b7c6",
+    "cursor": "#cc7832",
+    "selection_background": "#4b2222",
+    "search_matches_background": "#ff6b6b",
+    "search_matches_foreground": "#1e1f22",
+    "search_focused_match_background": "#ff6b6b",
+    "normal_black": "#282828",
+    "normal_red": "#cc7832",
+    "normal_green": "#6a8759",
+    "normal_yellow": "#cc7832",
+    "normal_blue": "#6897bb",
+    "normal_magenta": "#a9b7c6",
+    "normal_cyan": "#6897bb",
+    "normal_white": "#a9b7c6",
+    "bright_black": "#928374",
+    "bright_white": "#ffffff",
+    "tag_orange": "#cc7832",
+    "attribute_violet": "#ff8f8f"
+  },
+  "globals": {
+    "background": "var(background)",
+    "foreground": "var(foreground)",
+    "caret": "var(cursor)",
+    "selection": "var(selection_background)",
+    "selection_foreground": "var(bright_foreground)",
+    "inactive_selection": "var(selection_background)",
+    "line_highlight": "#2a2e32",
+    "gutter_foreground": "var(dim_foreground)"
+  },
+  "rules": [
+    {
+      "scope": "comment",
+      "foreground": "var(dim_foreground)"
+    },
+    {
+      "scope": "string",
+      "foreground": "var(normal_green)"
+    },
+    {
+      "scope": "keyword",
+      "foreground": "var(normal_red)"
+    },
+    {
+      "scope": "constant.numeric",
+      "foreground": "var(normal_blue)"
+    },
+    {
+      "scope": "variable",
+      "foreground": "var(normal_magenta)"
+    },
+    {
+      "scope": "entity.name.tag",
+      "foreground": "var(tag_orange)"
+    },
+    {
+      "scope": "punctuation.definition.tag",
+      "foreground": "var(tag_orange)"
+    },
+    {
+      "scope": "entity.other.attribute-name",
+      "foreground": "var(attribute_violet)"
+    },
+    {
+      "scope": "search",
+      "background": "var(search_matches_background)",
+      "foreground": "var(search_matches_foreground)"
+    },
+    {
+      "scope": "search.current",
+      "background": "var(search_focused_match_background)",
+      "foreground": "var(search_matches_foreground)"
+    },
+    {
+      "scope": "support.function",
+      "foreground": "var(normal_cyan)"
+    },
+    {
+      "scope": "support.constant",
+      "foreground": "var(normal_blue)"
+    },
+    {
+      "scope": "invalid",
+      "foreground": "#ffffff",
+      "background": "#ff0000"
+    },
+    {
+      "scope": "meta.function-call",
+      "foreground": "var(normal_cyan)"
+    },
+    {
+      "scope": "storage.type",
+      "foreground": "var(normal_red)"
+    },
+    {
+      "scope": "storage.modifier",
+      "foreground": "var(normal_red)"
+    }
+  ]
+}
