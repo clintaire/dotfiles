@@ -1096,12 +1096,17 @@
   "vs-kubernetes": {
     "vscode-kubernetes.kubectl-path-mac": "/Users/focus/.vs-kubernetes/tools/kubectl/kubectl",
     "vscode-kubernetes.helm-path-mac": "/Users/focus/.vs-kubernetes/tools/helm/darwin-arm64/helm",
-    "vscode-kubernetes.minikube-path-mac": "/Users/focus/.vs-kubernetes/tools/minikube/darwin-arm64/minikube"
+    "vscode-kubernetes.minikube-path-mac": "/Users/focus/.vs-kubernetes/tools/minikube/darwin-arm64/minikube",
+    "vscode-kubernetes.helm-path-linux": "/home/focus/.local/state/vs-kubernetes/tools/helm/linux-amd64/helm",
+    "vscode-kubernetes.kubectl-path-linux": "/home/focus/.local/state/vs-kubernetes/tools/kubectl/kubectl",
+    "vscode-kubernetes.minikube-path-linux": "/home/focus/.local/state/vs-kubernetes/tools/minikube/linux-amd64/minikube"
   },
   "workbench.editorAssociations": {
     "*.copilotmd": "vscode.markdown.preview.editor",
     "*.pdf": "latex-workshop-pdf-hook"
-  }
+  },
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.productIconTheme": "material-product-icons"
 
   // Linux Kubernetes Path
   // "vs-kubernetes": {

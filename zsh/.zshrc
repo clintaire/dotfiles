@@ -1,3 +1,6 @@
+# ▓ ▓ ▓ ▓ ▓▓▓▓ ▓ ▓
+#     ▓ ▓ zshr ▓ ▓ ▓ ▓
+#
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -78,21 +81,17 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
+# plugins=(git)
 plugins=(
     git
     npm
     node
     pip
-    rust
-    gh
     zsh-syntax-highlighting
     zsh-autosuggestions
 )
 
 source $ZSH/oh-my-zsh.sh
-
-# Antigen
-# antigen bundle zsh-users/zsh-autosuggestions
 
 # User configuration
 
@@ -123,16 +122,26 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# ------------------------------
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# alias ls='ls -G'
+
+# export GPG_TTY=$(tty)
+
+# Created by `pipx` on 2024-12-22 02:09:36
+# export PATH="$PATH:/Users/focus/.local/bin"
+
+# ------------------------------
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# CUDA
+export PATH=/opt/cuda/bin:$PATH
+export LD_LIBRARY_PATH=/opt/cuda/lib64:$LD_LIBRARY_PATH
 
-alias ls='ls -G'
-
+# GPG_TTY
 export GPG_TTY=$(tty)
-
-# Created by `pipx` on 2024-12-22 02:09:36
-export PATH="$PATH:/Users/focus/.local/bin"
