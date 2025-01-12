@@ -3,7 +3,8 @@
   "files.autoSave": "onFocusChange",
   "files.autoSaveDelay": 1000,
   "editor.formatOnSave": true,
-  "editor.formatOnType": false,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
   "editor.fontFamily": "'Fira Code', 'JetBrains Mono', 'Menlo', monospace",
   // "editor.fontWeight": "400",
 
@@ -67,7 +68,6 @@
 
   "editor.fontSize": 15.0,
 
-  "extensions.autoUpdate": false,
   "extensions.ignoreRecommendations": true,
 
 
@@ -190,7 +190,7 @@
   "terminal.integrated.defaultProfile.osx": "zsh",
 
   "git.enableCommitSigning": true,
-  "git.confirmSync": false,
+  "git.confirmSync": true,
   "git.gpgSign": true,
   "git.useEditorAsCommitInput": false,
   "git.useIntegratedTerminal": true,
@@ -199,8 +199,12 @@
   "git.submitSignoff": true,
   "git.enableSmartCommit": true,
   "git.autoStash": true,
+  "git.autoRepositoryDetection": "openEditors",
+  "git.autoFetch": false,
 
   "git.gpgPath": "/opt/homebrew/bin/gpg",
+
+  "extensions.autoUpdate": true,
 
   "eslint.enable": true,
   "editor.codeActionsOnSave": {
@@ -227,6 +231,15 @@
   "C_Cpp.clang_format_style": "file",
   "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
   "java.format.settings.profile": "GoogleStyle",
+
+
+  // Java settings
+
+  "java.settings.autoBuild.enabled": false,
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.compile.nullAnalysis.mode": "disabled",
 
   // Language-specific settings
 
@@ -521,6 +534,8 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.suggest.completeFunctionCalls": true,
   "typescript.suggest.completeFunctionCalls": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+
 
   // Better Git experience
 
@@ -579,47 +594,99 @@
   "search.useParentIgnoreFiles": true,
 
   "search.exclude": {
+    // Dependency directories
     "**/node_modules": true,
     "**/bower_components": true,
+
+    // Python environments and cache
     "**/env": true,
     "**/venv": true,
-    "**/.git": true,
     "**/__pycache__": true,
+
+    // Build and output directories
     "**/dist": true,
+    "**/build": true,
+    "**/target": true,
     "**/.cache": true,
     "**/coverage": true,
-    "**/*.min.*": true
+    "**/output": true,
+    "**/.gradle": true,
+    "**/.mvn": true,
+
+    // Framework-specific temporary files
+    "**/.next": true,
+    "**/.nuxt": true,
+    "**/.svelte-kit": true,
+
+    // Minified files
+    "**/*.min.*": true,
+
+    // Git metadata
+    "**/.git": true,
+
+    // Temporary directories
+    "**/tmp": true,
+
+    // Docker and Kubernetes metadata
+    "**/.docker": true,
+    "**/.kube": true
   },
+
 
   "search.followSymlinks": false,
 
   "files.exclude": {
+    // Git and system files
     "**/.git": true,
     "**/.DS_Store": true,
+
+    // Dependency directories
     "**/node_modules": true,
-    "**/__pycache__": true,
-    "**/output": true,
-    "**/target": true,
+    "**/bower_components": true,
+
+    // Build and output files
     "**/dist": true,
-    "**/.cache": true,
-    "**/coverage": true,
+    "**/build": true,
+    "**/target": true,
+    "**/output": true,
+
+    // Temporary and compiled files
+    "**/__pycache__": true,
     "**/*.class": true,
     "**/*.o": true,
-    "**/.idea": true,
-    "**/.vscode": false,
     "**/*.dll": true,
     "**/*.exe": true,
     "**/*.so": true,
     "**/*.dylib": true,
     "**/*.jar": true,
     "**/*.war": true,
-    "**/.gradle": true,
-    "**/.mvn": true,
-    "**/build": true,
-    "**/.tox": true,
+
+    // Python environments
     "**/env": true,
-    "**/venv": true
+    "**/venv": true,
+
+    // Java-related metadata
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings/": true,
+
+    // Framework-specific temporary files
+    "**/.next": true,
+    "**/.nuxt": true,
+    "**/.svelte-kit": true,
+
+    // Docker and Kubernetes metadata
+    "**/.docker": true,
+    "**/.kube": true,
+
+    // Editor-specific metadata
+    "**/.idea": true,
+
+    // Gradle and Maven directories
+    "**/.gradle": true,
+    "**/.mvn": true
   },
+
 
   "problems.showCurrentInStatus": true,
   "problems.decorations.enabled": true,
@@ -715,19 +782,39 @@
   "workbench.list.smoothScrolling": true,
 
   "files.watcherExclude": {
-    "**/node_modules/*/**": true,
-    "**/env/*/**": true,
-    "**/venv/*/**": true,
+    // Dependency directories
+    "**/node_modules/**": true,
+
+    // Git objects
     "**/.git/objects/**": true,
+
+    // Build and output files
     "**/dist/**": true,
     "**/build/**": true,
     "**/target/**": true,
+
+    // Python environments and cache
+    "**/__pycache__/**": true,
+    "**/env/**": true,
+    "**/venv/**": true,
+
+    // Gradle and Maven
     "**/.gradle/**": true,
+    "**/.mvn/**": true,
+
+    // Temporary directories
     "**/tmp/**": true,
+
+    // Framework-specific files
     "**/.next/**": true,
-    "**/coverage/**": true,
-    "**/.cache/**": true
+    "**/.nuxt/**": true,
+    "**/.svelte-kit/**": true,
+
+    // Docker and Kubernetes metadata
+    "**/.docker/**": true,
+    "**/.kube/**": true
   },
+
 
   "editor.guides.highlightActiveIndentation": true,
 
