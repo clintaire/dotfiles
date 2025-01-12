@@ -58,3 +58,6 @@ fi
 
 # alias zshconfig="nvim ~/.zshrc"
 # alias ohmyzsh="nvim ~/.oh-my-zsh"
+
+# Npm Global
+export PATH=~/.npm-global/bin:$PATH
