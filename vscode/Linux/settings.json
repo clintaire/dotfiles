@@ -239,7 +239,7 @@
   "java.import.gradle.enabled": false,
   "java.import.maven.enabled": false,
   "java.configuration.updateBuildConfiguration": "interactive",
-  "java.compile.nullAnalysis.mode": "disabled",
+  "java.compile.nullAnalysis.mode": "automatic",
 
   // Language-specific settings
 
@@ -1060,11 +1060,11 @@
 
   // Optional: Remote Development
   "remote.SSH.useLocalServer": true,
+  "remote.SSH.useExecServer": false,
 
   // Optional: Web Development
   "livePreview.portNumber": 3000,
   "window.customTitleBarVisibility": "never",
-  "workbench.statusBar.visible": true,
 
   "cSpell.userWords": [
     "clintaire",
@@ -1156,7 +1156,6 @@
   "r.rterm.mac": "/opt/homebrew/bin/R",
   "r.rpath.mac": "/opt/homebrew/bin/R",
 
-  // Replace macOS terminal profiles with Linux
   "terminal.integrated.profiles.linux": {
     "zsh (login)": {
       "path": "zsh",
@@ -1211,5 +1210,7 @@
   "snyk.yesWelcomeNotification": false,
   "snyk.trustedFolders": [
     "/home/focus"
-  ]
+  ],
+  "cmake.options.statusBarVisibility": "visible",
+  "githubPullRequests.pullBranch": "never"
 }
