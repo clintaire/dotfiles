@@ -5,7 +5,7 @@
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.formatOnType": true,
-  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', 'Menlo', monospace",
+  "editor.fontFamily": "'JetBrains Mono', 'Fira Code', 'Roboto', Microsoft Sans Serif",
   // "editor.fontWeight": "400",
 
   // Enable font ligatures
@@ -66,7 +66,7 @@
     ]
   },
 
-  "editor.fontSize": 15.0,
+  "editor.fontSize": 14.0,
 
   "extensions.ignoreRecommendations": true,
 
@@ -190,7 +190,7 @@
   "terminal.integrated.defaultProfile.osx": "zsh",
 
   "git.enableCommitSigning": true,
-  "git.confirmSync": true,
+  "git.confirmSync": false,
   "git.gpgSign": true,
   "git.useEditorAsCommitInput": false,
   "git.useIntegratedTerminal": true,
