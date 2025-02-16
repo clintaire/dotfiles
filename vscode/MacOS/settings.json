@@ -1,4 +1,42 @@
 {
+  /**
+   * Fonts:
+   * ----------------------------------------------------------------
+   *   Luxi Mono
+   *     https://www.fontsquirrel.com/fonts/luxi-mono
+   *   * Author: Bigelow & Holmes
+   *
+   *   Monaspace Radon
+   *             Krypton
+   *             Xenon
+   *             Argon
+   *             Neon
+   *     https://github.com/githubnext/monaspace
+   *   * Author: GitHub Next
+   *
+   *   AA Typewriter
+   *     https://www.dafont.com/aa-typewriter.font
+   *   * Author: Andreas Larsen
+   *
+   *   JetBrains Mono
+   *     https://github.com/JetBrains/JetBrainsMono
+   *   * Author: JetBrains
+   *
+   *   Fira Code
+   *     https://github.com/tonsky/FiraCode
+   *   * Author: Nikita Prokopov
+   *
+   *   Nerd Fonts
+   *     https://www.nerdfonts.com/font-downloads
+   *   * Author: Ryan L McIntyre
+   *
+   *   > DepartureMono Nerd Font
+   *   > LaTeX :: LUCKY TYPEWRITER - Luxi Mono - Libre Franklin
+   *
+   *   > I am Grateful to the Developers of these Fonts.
+   * ---------------------------------------------------------------
+   */
+
   "cmake.pinnedCommands": [
     "workbench.action.tasks.configureTaskRunner",
     "workbench.action.tasks.runTask"
@@ -11,7 +49,7 @@
   "editor.fontWeight": "400",
   "editor.cursorBlinking": "smooth",
   "editor.cursorStyle": "line",
-  "editor.cursorWidth": 2,
+  "editor.cursorWidth": 1,
   "editor.renderWhitespace": "selection",
   "editor.renderControlCharacters": true,
   "editor.minimap.enabled": false,
@@ -44,41 +82,6 @@
   "editor.bracketPairColorization.enabled": true,
 
   "window.customTitleBarVisibility": "never",
-
-  /**
-      * Fonts:
-        * https://github.com/githubnext/monaspace
-        * Monaspace Krypton
-        * Monaspace Xenon
-        * Monaspace Argon
-        * Monaspace Neon
-        * Monaspace Radon
-      * Author: GitHub
-
-        * https://www.dafont.com/aa-typewriter.font
-        * AA Typewriter
-      * Author: Andreas Larsen
-
-        * https://github.com/JetBrains/JetBrainsMono
-        * JetBrains Mono
-      * Author: JetBrains
-
-        * https://github.com/tonsky/FiraCode
-        * Fira Code
-      * Author: Nikita Prokopov
-
-        * https://www.nerdfonts.com/font-downloads
-        * ==> Nerd Fonts
-      * Author: Ryan L McIntyre
-
-        *https://www.fontsquirrel.com/fonts/luxi-mono
-        * Luxi Mono
-      * Author: Bigelow & Holmes
-
-      * {{}} DepartureMono Nerd Font << << LUCKY TYPEWRITER << LaTeX
-      *
-      * I am Grateful to the Developers of these Fonts.
-    */
 
   "editor.minimap.showSlider": "always",
   "editor.minimap.renderCharacters": false,
@@ -113,15 +116,12 @@
   "git.gpgSign": true,
   "git.useEditorAsCommitInput": false,
   "git.useIntegratedTerminal": true,
-  "git.autofetch": true,
+  "git.autoFetch": false,
   "git.autofetchPeriod": 180,
   "git.submitSignoff": true,
   "git.enableSmartCommit": true,
   "git.autoStash": true,
   "git.autoRepositoryDetection": "openEditors",
-  "git.autoFetch": false,
-
-  //"git.gpgPath": "/opt/homebrew/bin/gpg",
 
   "workbench.colorCustomizations": {
     "foreground": "#e0e0e0",
@@ -152,9 +152,9 @@
     "editorOverviewRuler.warningForeground": "#ffd700",
     "editorOverviewRuler.infoForeground": "#1e90ff",
     "editorOverviewRuler.bracketMatchForeground": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightForeground": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightStrongForeground": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightTextForeground": "#e0e0e0",
+    "editorOverviewRuler.wordHighlightForeground": "#e0e0e000",
+    "editorOverviewRuler.wordHighlightStrongForeground": "#e0e0e000",
+    "editorOverviewRuler.wordHighlightTextForeground": "#e0e0e000",
     "editorOverviewRuler.wordHighlightBackground": "#000000",
     "editorOverviewRuler.wordHighlightStrongBackground": "#000000",
     "editorOverviewRuler.wordHighlightTextBackground": "#000000",
@@ -250,8 +250,10 @@
     "inputValidation.warningForeground": "#090303",
     "inputValidation.warningBorder": "#ffd700"
   },
+
   "extensions.autoUpdate": true,
   "eslint.enable": true,
+
   "eslint.run": "onType",
   "eslint.validate": [
     "javascript",
@@ -259,6 +261,7 @@
     "typescript",
     "typescriptreact"
   ],
+
   "python.linting.flake8Path": "flake8",
   "python.formatting.blackPath": "black",
   "python.formatting.blackArgs": ["--line-length", "88"],
@@ -1007,6 +1010,6 @@
   "cmake.showOptionsMovedNotification": false,
   "workbench.productIconTheme": "material-product-icons",
   "workbench.preferredLightColorTheme": "GitHub Dark Default",
-  "workbench.sideBar.location": "right",
   "workbench.editor.showTabs": "single"
+  //"workbench.preferredLightColorTheme": "GitHub Dark Default"
 }
