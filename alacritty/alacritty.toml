@@ -9,7 +9,7 @@ working_directory = "None"
 
 # ░ Window
 [window]
-padding = { x = 8, y = 8 }
+padding = { x = 20, y = 20 }
 dynamic_padding = true
 decorations = "None"
 resize_increments = true
@@ -21,8 +21,8 @@ decorations_theme_variant = "None"
 
 # ░ Font
 [font]
-normal = { family = "JetBrains Mono", style = "Regular" }
-size = 14
+normal = { family = "Luxi Mono", style = "Regular" }
+size = 16
 builtin_box_drawing = true
 
 # ░ Cursor
