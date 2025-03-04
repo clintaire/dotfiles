@@ -1,16 +1,5 @@
 {
-  "cmake.pinnedCommands": [
-    "workbench.action.tasks.configureTaskRunner",
-    "workbench.action.tasks.runTask"
-  ],
-
-  "telemetry.telemetryLevel": "off",
-  "workbench.editor.showTabs": "single",
-  "workbench.colorTheme": "Tomorrow Night Blue",
-  //"explorer.confirmDelete": false,
-  "gitlens.telemetry.enabled": false,
   "editor.fontFamily": "Luxi Mono",
-  "editor.fontSize": 16,
   "editor.lineHeight": 24,
   "editor.fontWeight": "400",
   "editor.cursorBlinking": "smooth",
@@ -18,7 +7,6 @@
   "editor.cursorWidth": 1,
   "editor.renderWhitespace": "selection",
   "editor.renderControlCharacters": true,
-  "editor.minimap.enabled": false,
   "editor.rulers": [80],
   "editor.renderLineHighlight": "all",
   "editor.scrollBeyondLastLine": false,
@@ -40,23 +28,14 @@
   },
 
   "editor.codeLens": true,
-  "editor.lightbulb.enabled": "on",
-  "editor.parameterHints.enabled": true,
   "editor.hover.enabled": true,
   "editor.suggestSelection": "first",
   "editor.fontLigatures": true,
   "editor.bracketPairColorization.enabled": true,
-
-  "window.customTitleBarVisibility": "never",
-
-  "editor.minimap.showSlider": "always",
-  "editor.minimap.renderCharacters": false,
   "editor.minimap.scale": 2,
   "editor.minimap.maxColumn": 120,
-  "editor.minimap.size": "fit",
 
   "extensions.ignoreRecommendations": true,
-
   "workbench.editor.enablePreview": false,
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.guides.indentation": true,
@@ -64,7 +43,6 @@
   "editor.occurrencesHighlight": "singleFile",
   "editor.smoothScrolling": true,
   "editor.mouseWheelScrollSensitivity": 1.5,
-
   "terminal.integrated.cursorBlinking": true,
   "terminal.integrated.cursorStyle": "line",
   "terminal.integrated.cursorStyleInactive": "line",
@@ -76,146 +54,13 @@
   "terminal.integrated.gpuAcceleration": "auto",
   "terminal.integrated.minimumContrastRatio": 4.5,
   "terminal.integrated.defaultProfile.osx": "zsh",
-
   "git.enableCommitSigning": true,
   "git.confirmSync": false,
-  // "git.gpgSign": true,
   "git.useEditorAsCommitInput": false,
-  // "git.useIntegratedTerminal": true,
-  // "git.autoFetch": false,
   "git.autofetchPeriod": 180,
-  // "git.submitSignoff": true,
   "git.enableSmartCommit": true,
   "git.autoStash": true,
   "git.autoRepositoryDetection": "openEditors",
-
-  "workbench.colorCustomizations": {
-    "foreground": "#e0e0e0",
-    "background": "#000000",
-    "editor.background": "#090303",
-    "editor.foreground": "#e0e0e0",
-    "editor.selectionBackground": "#1a1a1a",
-    "editor.selectionForeground": "#e0e0e0",
-    "editor.lineHighlightBackground": "#090303",
-    "editorCursor.foreground": "#e0e0e0",
-    "editorWhitespace.foreground": "#2e2e2e",
-    "editorIndentGuide.background1": "#2e2e2e",
-    "editorIndentGuide.activeBackground1": "#e0e0e0",
-    "editorLineNumber.foreground": "#2e2e2e",
-    "editorLineNumber.activeForeground": "#e0e0e0",
-    "editorGutter.background": "#000000",
-    "editorGutter.modifiedBackground": "#ffd700",
-    "editorGutter.addedBackground": "#32cd32",
-    "editorGutter.deletedBackground": "#ff4500",
-    "editorBracketMatch.background": "#090303",
-    "editorBracketMatch.border": "#e0e0e0",
-    "editorOverviewRuler.border": "#090404",
-    "editorOverviewRuler.background": "#090303",
-    "editorOverviewRuler.modifiedForeground": "#ffd700",
-    "editorOverviewRuler.addedForeground": "#32cd32",
-    "editorOverviewRuler.deletedForeground": "#ff4500",
-    "editorOverviewRuler.errorForeground": "#ff4500",
-    "editorOverviewRuler.warningForeground": "#ffd700",
-    "editorOverviewRuler.infoForeground": "#1e90ff",
-    "editorOverviewRuler.bracketMatchForeground": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightForeground": "#e0e0e000",
-    "editorOverviewRuler.wordHighlightStrongForeground": "#e0e0e000",
-    "editorOverviewRuler.wordHighlightTextForeground": "#e0e0e000",
-    "editorOverviewRuler.wordHighlightBackground": "#000000",
-    "editorOverviewRuler.wordHighlightStrongBackground": "#000000",
-    "editorOverviewRuler.wordHighlightTextBackground": "#000000",
-    "editorOverviewRuler.wordHighlightBorder": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightStrongBorder": "#e0e0e0",
-    "editorOverviewRuler.wordHighlightTextBorder": "#e0e0e0",
-    "textLink.foreground": "#87ceeb",
-    "terminal.background": "#000000",
-    "terminal.foreground": "#e0e0e0",
-    "terminal.ansiBlack": "#000000",
-    "terminal.ansiBrightBlack": "#2e2e2e",
-    "terminal.ansiRed": "#ff4500",
-    "terminal.ansiBrightRed": "#ff6347",
-    "terminal.ansiGreen": "#32cd32",
-    "terminal.ansiBrightGreen": "#7fff00",
-    "terminal.ansiYellow": "#ffd700",
-    "terminal.ansiBrightYellow": "#ffeb3b",
-    "terminal.ansiBlue": "#1e90ff",
-    "terminal.ansiBrightBlue": "#00bfff",
-    "terminal.ansiMagenta": "#ba55d3",
-    "terminal.ansiBrightMagenta": "#dda0dd",
-    "terminal.ansiCyan": "#20b2aa",
-    "terminal.ansiBrightCyan": "#40e0d0",
-    "terminal.ansiWhite": "#e0e0e0",
-    "terminal.ansiBrightWhite": "#ffffff",
-    "terminalCursor.foreground": "#e0e0e0",
-    "terminalCursor.background": "#000000",
-    "tab.activeForeground": "#e0e0e0",
-    "tab.activeBackground": "#090404",
-    "tab.inactiveForeground": "#2e2e2e",
-    "tab.inactiveBackground": "#1a1a1a",
-    "tab.border": "#e0e0e0",
-    "tab.unfocusedActiveBorder": "#2e2e2e",
-    "sideBar.background": "#090303",
-    "sideBar.foreground": "#e0e0e0",
-    "sideBarSectionHeader.background": "#000000",
-    "sideBarSectionHeader.foreground": "#e0e0e0",
-    "sideBarTitle.foreground": "#e0e0e0",
-    "activityBar.background": "#090303",
-    "activityBar.foreground": "#e0e0e0",
-    "activityBarBadge.background": "#1e90ff",
-    "activityBarBadge.foreground": "#090303",
-    "statusBar.background": "#090303",
-    "statusBar.foreground": "#e0e0e0",
-    "statusBar.noFolderBackground": "#000000",
-    "statusBar.noFolderForeground": "#e0e0e0",
-    "statusBar.debuggingBackground": "#090404",
-    "statusBar.debuggingForeground": "#e0e0e0",
-    "titleBar.activeBackground": "#090303",
-    "titleBar.activeForeground": "#e0e0e0",
-    "titleBar.inactiveBackground": "#1a1a1a",
-    "titleBar.inactiveForeground": "#2e2e2e",
-    "menu.background": "#090303",
-    "menu.foreground": "#e0e0e0",
-    "menu.selectionBackground": "#1a1a1a",
-    "menu.selectionForeground": "#e0e0e0",
-    "menu.separatorBackground": "#2e2e2e",
-    "panel.background": "#090404",
-    "panel.foreground": "#e0e0e0",
-    "panel.border": "#2e2e2e",
-    "panelTitle.activeForeground": "#e0e0e0",
-    "panelTitle.inactiveForeground": "#2e2e2e",
-    "panelTitle.activeBorder": "#1e90ff",
-    "badge.background": "#1e90ff",
-    "badge.foreground": "#000000",
-    "scrollbarSlider.background": "#2e2e2e",
-    "scrollbarSlider.hoverBackground": "#3e3e3e",
-    "scrollbarSlider.activeBackground": "#5e5e5e",
-    "progressBar.background": "#1e90ff",
-    "list.activeSelectionBackground": "#1a1a1a",
-    "list.activeSelectionForeground": "#e0e0e0",
-    "list.inactiveSelectionBackground": "#1a1a1a",
-    "list.inactiveSelectionForeground": "#e0e0e0",
-    "list.hoverBackground": "#2e2e2e",
-    "list.hoverForeground": "#e0e0e0",
-    "list.focusBackground": "#1a1a1a",
-    "list.focusForeground": "#e0e0e0",
-    "list.highlightForeground": "#87ceeb",
-    "pickerGroup.foreground": "#87ceeb",
-    "pickerGroup.border": "#2e2e2e",
-    "input.background": "#000000",
-    "input.foreground": "#e0e0e0",
-    "input.border": "#2e2e2e",
-    "input.placeholderForeground": "#2e2e2e",
-    "inputOption.activeBorder": "#1e90ff",
-    "inputValidation.errorBackground": "#ff4500",
-    "inputValidation.errorForeground": "#000000",
-    "inputValidation.errorBorder": "#ff4500",
-    "inputValidation.infoBackground": "#1e90ff",
-    "inputValidation.infoForeground": "#000000",
-    "inputValidation.infoBorder": "#1e90ff",
-    "inputValidation.warningBackground": "#ffd700",
-    "inputValidation.warningForeground": "#090303",
-    "inputValidation.warningBorder": "#ffd700"
-  },
 
   "extensions.autoUpdate": true,
   "eslint.enable": true,
@@ -228,10 +73,10 @@
     "typescriptreact"
   ],
 
-  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "rust-analyzer.procMacro.enable": true,
   "C_Cpp.clang_format_style": "file",
 
-  // "prettier.configPath": "./.prettierrc",
+  "prettier.configPath": "./.prettierrc",
 
   "[javascript]": {
     "editor.tabSize": 2,
@@ -266,19 +111,17 @@
     "editor.tabSize": 4
   },
 
-  /*
-  "[java]": {
-    "editor.tabSize": 4,
-    "editor.defaultFormatter": "redhat.java"
-  },
-  */
-
   "[c]": {
     "editor.tabSize": 4
   },
 
   "[cpp]": {
     "editor.tabSize": 4
+  },
+
+  "[r]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
 
   "[assembly]": {
@@ -297,6 +140,12 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+
+  "jupyter.widgetScriptSources": ["jsdelivr.com", "unpkg.com"],
+  "jupyter.experiments.enabled": false,
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+  "jupyter.askForKernelRestart": false,
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
 
   // "latex-workshop.view.pdf.viewer": "tab",
   "latex-workshop.message.warning.show": false,
@@ -423,10 +272,7 @@
     "*.vrb"
   ],
 
-  "latex-workshop.message.update.show": false,
-
   "latex-workshop.intellisense.package.enabled": true,
-
   "latex-workshop.intellisense.package.dirs": [
     "./texmf/tex/latex",
     "./texmf/bibtex/bst"
@@ -453,19 +299,15 @@
     "/node_modules/"
   ],
 
-  // "latex-workshop.view.pdf.backgroundColor": "#ffffff",
   "latex-workshop.view.pdf.zoom": "auto",
-
   "latex-workshop.view.pdf.color.light.pageColorsForeground": "",
   "latex-workshop.view.pdf.color.light.pageColorsBackground": "",
   "latex-workshop.view.pdf.color.light.pageBorderColor": "lightgrey",
-
   "latex-workshop.view.pdf.color.dark.pageColorsForeground": "",
   "latex-workshop.view.pdf.color.dark.pageColorsBackground": "",
   "latex-workshop.view.pdf.color.dark.pageBorderColor": "darkgrey",
-
-  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
   "python.defaultInterpreterPath": "~/.python-global/global-env/bin/python3",
+
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.autoSearchPaths": true,
   "python.analysis.diagnosticMode": "workspace",
@@ -474,26 +316,20 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.suggest.completeFunctionCalls": true,
   "typescript.suggest.completeFunctionCalls": true,
-
   "git.pruneOnFetch": true,
-
   "python.analysis.completeFunctionParens": true,
   "python.analysis.autoImportCompletions": true,
-
   "markdown.preview.breaks": true,
   "markdown.preview.typographer": true,
   "markdown.math.enabled": true,
-
   "debug.inlineValues": "on",
   "debug.toolBarLocation": "floating",
   "debug.console.fontSize": 14,
   "debug.showInStatusBar": "always",
   "debug.terminal.clearBeforeReusing": true,
-
   "terminal.integrated.shellIntegration.enabled": true,
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.tabs.enableAnimation": false,
-
   "search.smartCase": true,
   "search.useGlobalIgnoreFiles": true,
   "search.useParentIgnoreFiles": true,
@@ -559,7 +395,6 @@
 
   "problems.showCurrentInStatus": true,
   "problems.decorations.enabled": true,
-
   "editor.suggestOnTriggerCharacters": true,
   "editor.suggest.preview": true,
   "editor.inlineSuggest.enabled": true,
@@ -576,37 +411,27 @@
   "diffEditor.ignoreTrimWhitespace": false,
   "diffEditor.renderSideBySide": true,
   "diffEditor.maxComputationTime": 5000,
-
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.tree.indent": 20,
   "workbench.tree.renderIndentGuides": "always",
   "explorer.compactFolders": false,
   "explorer.confirmDelete": false,
-
   "editor.linkedEditing": true,
   "editor.stickyScroll.enabled": true,
   "editor.inlayHints.enabled": "on",
-
+  "rust-analyzer.cargo.features": ["nalgebra", "ndarray"],
   "C_Cpp.default.includePath": [
     "${workspaceFolder}/**",
     "/opt/homebrew/include",
     "/usr/local/opt/eigen/include/eigen3",
     "${workspaceFolder}/C/includes"
   ],
-  "java.project.referencedLibraries": [
-    "lib/**/*.jar",
-    "${workspaceFolder}/lib/commons-math3-3.6.1.jar"
-  ],
-
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,
-
   "editor.semanticHighlighting.enabled": true,
-
   "editor.unicodeHighlight.ambiguousCharacters": false,
   "editor.unicodeHighlight.invisibleCharacters": false,
-
   "workbench.list.smoothScrolling": true,
 
   "files.watcherExclude": {
@@ -629,70 +454,56 @@
   },
 
   "editor.guides.highlightActiveIndentation": true,
-
   "terminal.integrated.enablePersistentSessions": true,
   "terminal.integrated.persistentSessionReviveProcess": "never",
   "terminal.integrated.scrollback": 10000,
-
   "git.mergeEditor": true,
   "git.openRepositoryInParentFolders": "always",
   "git.useIntegratedAskPass": true,
   "git.terminalAuthentication": true,
-
   "search.sortOrder": "modified",
   "workbench.editor.splitInGroupLayout": "horizontal",
-
   "debug.autoExpandLazyVariables": "on",
   "debug.javascript.autoAttachFilter": "smart",
-
   "python.analysis.indexing": true,
   "typescript.tsserver.maxTsServerMemory": 2048,
-
   "workbench.tree.expandMode": "doubleClick",
   "workbench.editor.decorations.badges": true,
   "workbench.editor.decorations.colors": true,
-
   "testing.automaticallyOpenPeekView": "failureAnywhere",
   "testing.followRunningTest": true,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false
+  },
 
   "editor.gotoLocation.multipleDefinitions": "goto",
   "editor.gotoLocation.multipleTypeDefinitions": "goto",
-
   "typescript.preferences.importModuleSpecifier": "shortest",
   "javascript.preferences.importModuleSpecifier": "shortest",
-
   "workbench.reduceMotion": "on",
   "workbench.list.horizontalScrolling": true,
   "files.restoreUndoStack": false,
   "workbench.enableExperiments": false,
-
   "editor.suggest.insertMode": "replace",
   "editor.suggest.filterGraceful": true,
   "editor.suggest.localityBonus": true,
-
   "testing.saveBeforeTest": true,
   "testing.gutterEnabled": true,
-
   "security.workspace.trust.enabled": true,
   "security.workspace.trust.banner": "always",
-
   "files.enableTrash": false,
-
   "workbench.startupEditor": "none",
-
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
-
   "zenMode.hideLineNumbers": false,
   "zenMode.silentNotifications": true,
-
   "editor.maxTokenizationLineLength": 10000,
   "editor.unfoldOnClickAfterEndOfLine": false,
   "workbench.editor.closeOnFileDelete": true,
-
   "editor.snippetSuggestions": "top",
   "editor.selectionHighlight": false,
-
   "git.fetchOnPull": true,
   "git.showInlineOpenFileAction": false,
 
@@ -742,8 +553,6 @@
     "reportOptionalMemberAccess": "information"
   },
 
-  "terminal.integrated.rendererType": "canvas",
-
   "terminal.integrated.profiles.osx": {
     "zsh (login)": {
       "path": "zsh",
@@ -768,9 +577,10 @@
   "http.proxyStrictSSL": true,
   "update.mode": "manual",
 
-  "editor.experimental.asyncTokenization": true,
-
   "window.titleBarStyle": "custom",
+  "editor.stickyTabStops": true,
+
+  "livePreview.portNumber": 3000,
 
   "[bibtex-style]": {
     "editor.formatOnSave": true,
@@ -785,11 +595,11 @@
     "suppressGitMissingWarning": true
   },
 
-  // "editor.defaultFormatter": "esbenp.prettier-vscode",
-  // "prettier.requireConfig": true,
-  // "prettier.semi": true,
-  // "prettier.singleQuote": true,
-  // "prettier.tabWidth": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
+  "prettier.semi": true,
+  "prettier.singleQuote": true,
+  "prettier.tabWidth": 2,
 
   "terminal.integrated.profiles.linux": {
     "zsh (login)": {
@@ -798,11 +608,6 @@
     }
   },
   "terminal.integrated.defaultProfile.linux": "zsh (login)",
-  "redhat.telemetry.enabled": true,
-
-  "ipynb.experimental.serialization": true,
-  "better-comments.highlightPlainText": true,
-
   "explorer.fileNesting.patterns": {
     "*.ts": "${capture}.js",
     "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
@@ -824,11 +629,30 @@
     "*.pdf": "latex-workshop-pdf-hook"
   },
 
-  "snyk.yesWelcomeNotification": false,
-  "snyk.trustedFolders": ["/home/focus"],
   "githubPullRequests.pullBranch": "never",
   "workbench.editor.centeredLayoutFixedWidth": true,
-  "gitlens.ai.model": "github:o1-preview",
+
+  "cmake.options.statusBarVisibility": "compact",
+  "workbench.editor.showTabs": "single",
+  "window.customTitleBarVisibility": "never",
+  "makefile.configureOnOpen": true,
+  "workbench.preferredLightColorTheme": "GitHub Light",
+  "workbench.preferredDarkColorTheme": "GitHub Dark",
   "window.autoDetectColorScheme": true,
-  "cmake.options.statusBarVisibility": "compact"
+  "files.autoSave": "onFocusChange",
+  "diffEditor.codeLens": true,
+  "diffEditor.experimental.showEmptyDecorations": false,
+  "editor.minimap.autohide": true,
+  "editor.inlineSuggest.syntaxHighlightingEnabled": true,
+  "workbench.iconTheme": "vscode-icons",
+  "editor.minimap.side": "left",
+  "editor.minimap.size": "fill",
+  "editor.minimap.renderCharacters": false,
+  "workbench.sideBar.location": "right",
+  "explorer.confirmDragAndDrop": false,
+  "telemetry.telemetryLevel": "off",
+  "dotnetAcquisitionExtension.enableTelemetry": false,
+  "gitlens.telemetry.enabled": false,
+  "sonarlint.disableTelemetry": true,
+  "editor.fontSize": 16
 }
