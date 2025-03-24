@@ -9,7 +9,7 @@ working_directory = "None"
 
 # ░ Window
 [window]
-padding = { x = 20, y = 20 }
+padding = { x = 10, y = 10 }
 dynamic_padding = true
 decorations = "None"
 resize_increments = true
