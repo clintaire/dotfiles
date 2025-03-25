@@ -22,7 +22,7 @@ decorations_theme_variant = "None"
 # ░ Font
 [font]
 normal = { family = "Luxi Mono", style = "Regular" }
-size = 16
+size = 14
 builtin_box_drawing = true
 
 # ░ Cursor
