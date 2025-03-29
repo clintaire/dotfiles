@@ -13,12 +13,12 @@ padding = { x = 10, y = 10 }
 dynamic_padding = true
 decorations = "None"
 resize_increments = true
-opacity = 1.0
+opacity = 0.80
 startup_mode = "Maximized"
 title = "alacritty"
 dynamic_title = true
 decorations_theme_variant = "None"
-option_as_alt = "Both"  # Useful for macOS users
+option_as_alt = "Both"             # Useful for macOS users
 
 # ░ Font
 [font]
@@ -42,9 +42,7 @@ blink_timeout = 5
 # ░ Mouse
 [mouse]
 hide_when_typing = true
-bindings = [
-  { mouse = "Middle", action = "PasteSelection" }
-]
+bindings = [{ mouse = "Middle", action = "PasteSelection" }]
 
 # ░ Bell
 [bell]
