@@ -1,0 +1,108 @@
+/*
+ *
+ * GTK-3.0 Theme: Juno-Ocean MD3
+ *
+ * XFCE panel styling based on Material Design 3 principles
+ * with a color palette inspired by deep ocean blues.
+ *
+ * Installation:
+ * Place this file at: ~/.config/gtk-3.0/gtk.css
+ * (Create directory if needed: mkdir -p ~/.config/gtk-3.0)
+ *
+ * Apply changes: xfce4-panel -r
+ * (or restart XFCE session)
+ *
+ */
+
+.xfce4-panel {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background-color: #1A304A;
+    background-image: linear-gradient(180deg, #23456F 0%, #1A304A 100%);
+    color: #D0E0FF;
+    border: none;
+    padding: 2px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.xfce4-panel button,
+.xfce4-panel .toggle,
+#whiskermenu-button,
+#xfce4-notification-plugin,
+#pulseaudio-button,
+#xfce4-power-manager-plugin,
+#clock-button,
+#launcher-11 #launcher-arrow,
+#launcher-22 #launcher-arrow,
+#launcher-23 #launcher-arrow,
+#launcher-24 #launcher-arrow,
+#launcher-25 #launcher-arrow {
+    background: transparent;
+    color: #A0C0FF;
+    border: none;
+    border-radius: 16px;
+    padding: 6px 12px;
+    margin: 0 4px;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    box-shadow: none;
+    font-weight: 500;
+}
+
+.xfce4-panel button:hover,
+.xfce4-panel .toggle:hover,
+#whiskermenu-button:hover,
+#xfce4-notification-plugin:hover,
+#pulseaudio-button:hover,
+#xfce4-power-manager-plugin:hover,
+#clock-button:hover,
+#launcher-11 #launcher-arrow:hover,
+#launcher-22 #launcher-arrow:hover,
+#launcher-23 #launcher-arrow:hover,
+#launcher-24 #launcher-arrow:hover,
+#launcher-25 #launcher-arrow:hover {
+    background: rgba(160,192,255,0.12);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+    color: #FFFFFF;
+}
+
+.xfce4-panel button:focus,
+.xfce4-panel .toggle:focus {
+    outline: 2px solid rgba(160, 192, 255, 0.5);
+    outline-offset: 2px;
+}
+
+#pager-4 #xfce-panel-toggle-button:checked,
+.xfce4-panel .tasklist .toggle:checked {
+    background: rgba(160,192,255,0.2);
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+#whiskermenu-button {
+    background-color: rgba(160, 192, 255, 0.05);
+}
+
+#whiskermenu-button:hover {
+    background-color: rgba(160, 192, 255, 0.12);
+}
+
+#clock-button {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 9pt;
+    color: #D0E0FF;
+    padding: 4px 10px;
+}
+
+#clock-button:hover {
+    background-color: rgba(208, 224, 255, 0.08);
+    color: #D8E8FF;
+}
+
+#xfce4-notification-plugin,
+#pulseaudio-button,
+#xfce4-power-manager-plugin {
+    padding: 4px 8px;
+}
