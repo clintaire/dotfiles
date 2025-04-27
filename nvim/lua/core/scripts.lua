@@ -20,10 +20,41 @@ cmd("colorscheme catppuccin-mocha")
 -- Run ":so" after writing .zshrc
 cmd("autocmd BufWritePost ~/.zshrc so %")
 
--- Command to install tree-sitter CLI (simple version)
-cmd([[
-  command! InstallTreeSitterCLI terminal sudo pacman -S tree-sitter
-]])
+-- Utility function to detect the package manager
+local function detect_package_manager()
+    if vim.fn.executable("pacman") == 1 then
+        return "pacman"
+    elseif vim.fn.executable("apt") == 1 then
+        return "apt"
+    elseif vim.fn.executable("dnf") == 1 then
+        return "dnf"
+    else
+        return nil
+    end
+end
+
+local utils = require("core.utils")
+
+-- Command to install tree-sitter CLI based on the detected package manager
+local package_manager = utils.detect_package_manager()
+if package_manager == "pacman" then
+    cmd([[
+      command! InstallTreeSitterCLI terminal sudo pacman -S tree-sitter
+      echo "Tree-sitter CLI installed successfully."
+    ]])
+elseif package_manager == "apt" then
+    cmd([[
+      command! InstallTreeSitterCLI terminal sudo apt install tree-sitter-cli
+      echo "Tree-sitter CLI installed successfully."
+    ]])
+elseif package_manager == "dnf" then
+    cmd([[
+      command! InstallTreeSitterCLI terminal sudo dnf install tree-sitter-cli
+      echo "Tree-sitter CLI installed successfully."
+    ]])
+else
+    vim.notify("No supported package manager detected.", vim.log.levels.ERROR)
+end
 
 -- Command to install all configured parsers
 cmd([[
