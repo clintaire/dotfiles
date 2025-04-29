@@ -1,82 +1,71 @@
 # ▓ ▓ ▓ ▓ ▓▓▓▓▓▓▓▓▓ ▓ ▓
 #     ▓ ▓ Alacritty ▓ ▓ ▓ ▓
 
-# ░ General
-[general]
-import = ["~/.config/alacritty/themes/juno-ocean.toml"]
+# [general]
+import = ["~/.config/alacritty/themes/red.toml"]
 live_config_reload = true
 working_directory = "None"
 
-# ░ Window
 [window]
 padding = { x = 10, y = 10 }
 dynamic_padding = true
 decorations = "None"
 resize_increments = true
-opacity = 0.80
+opacity = 0.85
 startup_mode = "Maximized"
-title = "alacritty"
+title = "Alacritty - {shell}"
 dynamic_title = true
 decorations_theme_variant = "None"
-option_as_alt = "Both"             # Useful for macOS users
+option_as_alt = "Both"
 
-# ░ Font
 [font]
-normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
-bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
-italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
-bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
-size = 14
+normal = { family = "FiraCode Nerd Font", style = "Regular" }
+bold = { family = "FiraCode Nerd Font", style = "Bold" }
+italic = { family = "FiraCode Nerd Font", style = "Italic" }
+bold_italic = { family = "FiraCode Nerd Font", style = "Bold Italic" }
+size = 12
 builtin_box_drawing = true
 offset = { x = 0, y = 0 }
 glyph_offset = { x = 0, y = 0 }
 
-# ░ Cursor
 [cursor]
-style = { shape = "Beam", blinking = "Always" }
+style = { shape = "Block", blinking = "Always" }
 thickness = 0.15
-unfocused_hollow = true
+unfocused_hollow = false
+# text = "CellBackground"
+# cursor = "CellForeground"
 blink_interval = 750
 blink_timeout = 5
+#vi_mode_cursor = { text = "#ffffff", cursor = "#ff0000" }
 
-# ░ Mouse
 [mouse]
 hide_when_typing = true
 bindings = [{ mouse = "Middle", action = "PasteSelection" }]
 
-# ░ Bell
 [bell]
 animation = "EaseOutSine"
 duration = 0
 color = "#f89000"
 command = { program = "notify-send", args = ["Alacritty", "Terminal bell!"] }
 
-# ░ Keybindings
 [keyboard]
 bindings = [
-    # Basic operations
     { key = "V", mods = "Control|Shift", action = "Paste" },
     { key = "C", mods = "Control|Shift", action = "Copy" },
     { key = "N", mods = "Control|Shift", action = "SpawnNewInstance" },
     { key = "F", mods = "Control|Shift", action = "ToggleFullscreen" },
     { key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
     { key = "W", mods = "Control|Shift", action = "Quit" },
-
-    # Navigation
     { key = "PageUp", mods = "Control", action = "ScrollPageUp" },
     { key = "PageDown", mods = "Control", action = "ScrollPageDown" },
     { key = "Home", mods = "Control", action = "ScrollToTop" },
     { key = "End", mods = "Control", action = "ScrollToBottom" },
-
-    # Font size
     { key = "Key0", mods = "Control", action = "ResetFontSize" },
     { key = "Equals", mods = "Control", action = "IncreaseFontSize" },
     { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
     { key = "F5", mods = "Control|Shift", action = "ResetFontSize" },
     { key = "F6", mods = "Control|Shift", action = "IncreaseFontSize" },
     { key = "F7", mods = "Control|Shift", action = "DecreaseFontSize" },
-
-    # Other functions
     { key = "K", mods = "Control|Shift", action = "ClearLogNotice" },
     { key = "L", mods = "Control|Shift", action = "ClearHistory" },
     { key = "Q", mods = "Control", action = "Quit" },
@@ -85,41 +74,31 @@ bindings = [
     { key = "?", mods = "Control|Shift", action = "SearchBackward" },
 ]
 
-# ░ Scrolling
 [scrolling]
 history = 20000
-multiplier = 3
+multiplier = 1
 
-# ░ Selection
 [selection]
 semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 save_to_clipboard = true
 
-# ░ Terminal
 [terminal]
-shell = { program = "/bin/zsh", args = ["--login"] }
 osc52 = "OnlyCopy"
 
-# ░ Hints (clickable URLs)
 [hints]
-alphabet = "jfkdls;ahgurieowpq"
+alphabet = "asdfghjklqwertyuiopzxcvbnm"
 
 [[hints.enabled]]
-regex = "(ipfs:|ipns:|magnet:|mailto:|gemini:|gopher:|https:|http:|news:|file:|git:|ssh:|ftp:)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"
-hyperlinks = true
+regex = "(https?://\\S+)"
 command = "xdg-open"
-post_processing = true
-mouse.enabled = true
 binding = { key = "U", mods = "Control|Shift" }
 
-# ░ Debug
 [debug]
-render_timer = false
-persistent_logging = false
-log_level = "Warn"
+render_timer = true
+persistent_logging = true
+log_level = "Info"
 print_events = false
 
-# ░ Env
 [env]
 TERM = "xterm-256color"
 WINIT_X11_SCALE_FACTOR = "1.80"
