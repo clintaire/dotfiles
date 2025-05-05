@@ -21,7 +21,7 @@ end
 
 -- Use original setup style from nvim1/nvim2
 require("nvim-treesitter.configs").setup({
-    ensure_installed = { "bash", "c", "lua", "vim", "vimdoc", "query" },
+    ensure_installed = { "bash", "c", "lua", "vim" },
     sync_install = false,
     auto_install = false, -- Disable auto-install to prevent issues
     highlight = { enable = true },

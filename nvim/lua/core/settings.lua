@@ -11,6 +11,8 @@
 -- Neovim Lua Config File by Arfan Zubi
 -- SETTINGS
 
+local opt = vim.opt -- Initialize opt locally
+
 -- Set termguicolors to enable highlight groups
 opt.termguicolors = true
 

@@ -56,6 +56,10 @@ else
     vim.notify("No supported package manager detected.", vim.log.levels.ERROR)
 end
 
+if not package_manager then
+    vim.notify("No supported package manager detected. Please install tree-sitter manually.", vim.log.levels.ERROR)
+end
+
 -- Command to install all configured parsers
 cmd([[
   command! TreesitterInstallParsers TSInstall all

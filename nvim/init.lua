@@ -12,15 +12,17 @@
 -- INIT FILE
 
 -- Variables
-opt = vim.opt
-g = vim.g
-kmap = vim.keymap
-cmd = vim.cmd
+local opt = vim.opt
+_G.opt = opt -- Make opt global
+local g = vim.g
+_G.g = g -- Make g global
+local cmd = vim.cmd
+_G.cmd = cmd -- Make cmd global
 
 -- Leader key
 g.mapleader = ","
 
--- Imports
+-- Ensure global variables are defined before requiring other modules
 require("core.lazy")       -- lazy.nvim plugin manager
 require("core.utils")      -- Utility functions
 require("core.mappings")   -- Mappings

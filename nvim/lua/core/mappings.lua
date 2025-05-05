@@ -11,6 +11,9 @@
 -- Neovim Lua Config File by Arfan Zubi
 -- MAPPINGS
 
+-- Initialize kmap
+local kmap = vim.keymap
+
 -- Redo
 kmap.set("n", "U", "<C-r>", { desc = "Redo" })
 
@@ -27,7 +30,9 @@ kmap.set("n", "<c-right>", "<c-w>>", { desc = "Resize split window right" })
 kmap.set("n", "<c-left>", "<c-w><", { desc = "Resize split window left" })
 
 -- Undo Tree
-kmap.set("n", "<leader>ut", vim.cmd.UndotreeToggle, { desc = "Toggle UndoTree" })
+if vim.fn.exists(":UndotreeToggle") == 2 then
+    kmap.set("n", "<leader>ut", vim.cmd.UndotreeToggle, { desc = "Toggle UndoTree" })
+end
 
 -- Basic spell checking mappings (simplified)
 kmap.set("n", "z=", "<cmd>spellsuggest<cr>", { desc = "Show spelling suggestions" })
