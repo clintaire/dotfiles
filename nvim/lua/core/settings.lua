@@ -56,11 +56,11 @@ opt.signcolumn = "yes"
 -- Do not let cursor scroll below or above N number of lines when scrolling
 opt.scrolloff = 10
 
--- Wrap lines
-opt.wrap = true
-
--- Preserve indentation of virtual line
-opt.breakindent = true
+-- Proper text wrapping configuration
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.breakindent = true
+vim.opt.showbreak = "↪ "
 
 -- Search highlighting
 opt.hlsearch = false

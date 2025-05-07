@@ -13,45 +13,58 @@
 
 local lspconfig = require("lspconfig")
 
-require("mason").setup({})
-require("mason-lspconfig").setup({
-    ensure_installed = {
-        "bashls",
-        "clangd",
-        "cssls",
-        "dotls",
-        "eslint",
-        "html",
-        "jsonls",
-        "lua_ls",
-        "marksman",
-        "rust_analyzer",
-        "sqlls",
-        "taplo",
-        "ts_ls",
-        "yamlls",
-    },
-    automatic_installation = true,
+require("mason").setup({
+  ui = {
+    border = "rounded",
+    icons = {
+      package_installed = "✓",
+      package_pending = "➜",
+      package_uninstalled = "✗"
+    }
+  }
 })
 
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
+-- Fix the automatic_enable error by removing problematic options
+require("mason-lspconfig").setup({
+  ensure_installed = {
+    "bashls",
+    "clangd",
+    "cssls",
+    "html",
+    "jsonls",
+    "lua_ls",
+    "pyright",
+    "rust_analyzer",
+    "tsserver",
+    "yamlls",
+  },
+  -- Remove automatic_installation and automatic_setup options
+})
 
--- lspconfig setups for installed LSP servers via Mason
+-- Setup handlers manually
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+if pcall(require, "cmp_nvim_lsp") then
+  capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+end
+
+-- Manually set up LSP servers
 require("mason-lspconfig").setup_handlers({
-    function(server_name)
-        lspconfig[server_name].setup({
-            capabilities = capabilities
-        })
-    end,
-    ["lua_ls"] = function()
-        lspconfig.lua_ls.setup({
-            settings = {
-                Lua = {
-                    diagnostics = {
-                        globals = { "vim", "opt", "g", "kmap", "cmd", "Snacks" }
-                    }
-                }
-            }
-        })
-    end,
+  function(server_name)
+    lspconfig[server_name].setup({
+      capabilities = capabilities
+    })
+  end,
+
+  -- Custom server configurations
+  ["lua_ls"] = function()
+    lspconfig.lua_ls.setup({
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = {"vim", "opt", "g", "cmd"}
+          }
+        }
+      }
+    })
+  end
 })

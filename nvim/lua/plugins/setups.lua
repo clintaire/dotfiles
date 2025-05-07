@@ -50,3 +50,6 @@ require("noice").setup({
 		lsp_doc_border = true,
 	},
 })
+
+-- Add this line if you have a setups file:
+require("plugins.configs.dap_setup")()
