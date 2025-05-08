@@ -19,6 +19,8 @@ _G.g = g -- Make g global
 local cmd = vim.cmd
 _G.cmd = cmd -- Make cmd global
 
+vim.opt.termguicolors = true
+
 -- Leader key
 g.mapleader = ","
 

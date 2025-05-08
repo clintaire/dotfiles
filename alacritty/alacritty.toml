@@ -2,8 +2,8 @@
 #     ▓ ▓ Alacritty ▓ ▓ ▓ ▓
 
 # [general]
-import = ["~/.config/alacritty/themes/red.toml"]
-live_config_reload = true
+general.import = ["~/.config/alacritty/themes/red.toml"]
+general.live_config_reload = true
 working_directory = "None"
 
 [window]
@@ -29,7 +29,7 @@ offset = { x = 0, y = 0 }
 glyph_offset = { x = 0, y = 0 }
 
 [cursor]
-style = { shape = "Block", blinking = "Always" }
+style = { shape = "Beam", blinking = "Always" }
 thickness = 0.15
 unfocused_hollow = false
 # text = "CellBackground"

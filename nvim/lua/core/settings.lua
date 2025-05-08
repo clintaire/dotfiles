@@ -122,7 +122,15 @@ g.loaded_netrw = 1
 g.loaded_netrwPlugin = 1
 
 -- GUI settings
-opt.guifont = { "FiraCode Nerd Font", ":h14" }
+opt.guifont = { "FiraCode Nerd Font", ":h12" }
+
+-- GUI Scaling settings (if using Neovim GUI)
+if vim.g.neovide then
+    vim.g.neovide_scale_factor = 0.9
+end
+
+-- Font settings
+vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
 
 -- Disabling providers (if downloaded Neovim from one of this providers don't delete!)
 g.loaded_python3_provider = 0
