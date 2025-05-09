@@ -2,7 +2,7 @@
 #     ▓ ▓ Alacritty ▓ ▓ ▓ ▓
 
 # [general]
-general.import = ["~/.config/alacritty/themes/red.toml"]
+general.import = ["~/.config/alacritty/themes/gruvbox.toml"]
 general.live_config_reload = true
 working_directory = "None"
 
