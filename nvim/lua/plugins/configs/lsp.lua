@@ -6,10 +6,6 @@
 -- ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
 -- ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
 --
--- Thanks @ Arfan Zubi
--- https://github.com/3rfaan/dotfiles
--- Neovim Lua Config File by Arfan Zubi
--- LSP-CONFIG SETUP
 
 local border = {
     { "╭", "FloatBorder" },

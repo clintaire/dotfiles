@@ -5,11 +5,7 @@
 -- ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
 -- ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
 -- ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
---  
--- Thanks @ Arfan Zubi
--- https://github.com/3rfaan/dotfiles
--- Neovim Lua Config File by Arfan Zubi
--- CONFORM
+--
 
 require("conform").setup({
     formatters_by_ft = {

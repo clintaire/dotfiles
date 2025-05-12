@@ -6,13 +6,10 @@
 -- ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
 -- ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
 --
--- Thanks @ Arfan Zubi
--- https://github.com/3rfaan/dotfiles
--- Neovim Lua Config File by Arfan Zubi
--- MASON
 
 local lspconfig = require("lspconfig")
 
+-- Setup mason
 require("mason").setup({
   ui = {
     border = "rounded",
@@ -24,30 +21,36 @@ require("mason").setup({
   }
 })
 
--- Fix the automatic_enable error by removing problematic options
+-- Setup mason-lspconfig
 require("mason-lspconfig").setup({
   ensure_installed = {
-    "bashls",
-    "clangd",
-    "cssls",
-    "html",
-    "jsonls",
     "lua_ls",
     "pyright",
     "rust_analyzer",
     "tsserver",
+    "cssls",
+    "html",
+    "bashls",
+    "clangd",
+    "dotls",
+    "eslint",
+    "jsonls",
+    "marksman",
+    "sqlls",
+    "taplo",
     "yamlls",
   },
-  -- Remove automatic_installation and automatic_setup options
+  automatic_installation = {
+    exclude = {},
+  },
 })
 
--- Setup handlers manually
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 if pcall(require, "cmp_nvim_lsp") then
   capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
 end
 
--- Manually set up LSP servers
+-- Use setup_handlers
 require("mason-lspconfig").setup_handlers({
   function(server_name)
     lspconfig[server_name].setup({
@@ -55,16 +58,16 @@ require("mason-lspconfig").setup_handlers({
     })
   end,
 
-  -- Custom server configurations
   ["lua_ls"] = function()
     lspconfig.lua_ls.setup({
+      capabilities = capabilities,
       settings = {
         Lua = {
           diagnostics = {
-            globals = {"vim", "opt", "g", "cmd"}
+            globals = { "vim", "opt", "g", "kmap", "cmd", "Snacks" }
           }
         }
       }
     })
-  end
+  end,
 })

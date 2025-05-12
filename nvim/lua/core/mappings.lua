@@ -1,74 +1,63 @@
---
--- ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
--- ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
--- ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
--- ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
--- ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
--- ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
---
--- Thanks @ Arfan Zubi
--- https://github.com/3rfaan/dotfiles
--- Neovim Lua Config File by Arfan Zubi
--- MAPPINGS
+local vim = vim
 
--- Initialize kmap
-local kmap = vim.keymap
+vim.g.mapleader = " "
 
--- Redo
-kmap.set("n", "U", "<C-r>", { desc = "Redo" })
+-- Escape to normal mode the easy way
+vim.keymap.set("i", "jk", "<Esc>")
 
--- Simplified key mappings using Vim defaults where possible
+-- Move selected lines in visual mode up or down
+vim.keymap.set("v", "<A-Down>", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "<A-Up>", ":m '<-2<CR>gv=gv")
 
-local kmap = vim.keymap
+-- Tabline navigation (similar to Ctrl+Tab in editors)
+vim.keymap.set("n", "<C-Tab>", ":TablineBufferNext<CR>", { silent = true })
+vim.keymap.set("n", "<C-S-Tab>", ":TablineBufferPrevious<CR>", { silent = true })
 
--- WRAPPED LINE NAVIGATION: More intuitive navigation for wrapped lines
-kmap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", {expr = true, desc = "Down (respects wrapped lines)"})
-kmap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", {expr = true, desc = "Up (respects wrapped lines)"})
+-- Window hopping with Ctrl (like VSCode's Ctrl+Arrow)
+vim.keymap.set("n", "<C-Left>", "<C-w>h")
+vim.keymap.set("n", "<C-Down>", "<C-w>j")
+vim.keymap.set("n", "<C-Up>", "<C-w>k")
+vim.keymap.set("n", "<C-Right>", "<C-w>l")
 
--- COMMON ACTIONS: Simple, memorable shortcuts
-kmap.set("n", "<leader>w", ":w<CR>", { desc = "Save file" })
-kmap.set("n", "<leader>q", ":q<CR>", { desc = "Quit" })
-kmap.set("n", "<leader>Q", ":q!<CR>", { desc = "Force quit" })
+-- Split windows (Ctrl+\ for vertical, Ctrl+- for horizontal)
+vim.keymap.set("n", "<C-\\>", ":vs<CR>")
+vim.keymap.set("n", "<C-->", ":split<CR>")
 
--- LINE OPERATIONS: Natural mnemonics for common operations
-kmap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected lines down" })
-kmap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected lines up" })
+-- Buffers (Ctrl+Tab and Ctrl+Shift+Tab for next/previous buffer)
+vim.keymap.set("n", "<C-Tab>", ":bnext<CR>", { silent = true })
+vim.keymap.set("n", "<C-S-Tab>", ":bprevious<CR>", { silent = true })
+vim.keymap.set("n", "<C-w>", ":bd<CR>", { silent = true }) -- Close buffer (like Ctrl+W)
 
--- SPELL CHECKING: Simple toggle using mnemonic
-kmap.set("n", "<leader>s", "<cmd>set spell!<CR>", { desc = "Toggle spell checking" })
+-- Open terminal (Ctrl+`)
+vim.keymap.set("n", "<C-`>", ":below 18 sp<CR>:term<CR>i", { silent = true })
 
--- ESCAPE: Quicker escape from insert mode
-kmap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+-- Copy/Paste (Ctrl+C, Ctrl+V)
+vim.keymap.set("v", "<C-c>", '"+y')
+vim.keymap.set("n", "<C-v>", '"+p')
+vim.keymap.set("v", "<C-v>", '"+p')
 
--- BUFFER NAVIGATION: Similar to browser tabs
-kmap.set("n", "<Tab>", ":bnext<CR>", { desc = "Next buffer" })
-kmap.set("n", "<S-Tab>", ":bprevious<CR>", { desc = "Previous buffer" })
+-- Yank to clipboard (Ctrl+Shift+C)
+vim.keymap.set("n", "<C-S-c>", '"+y')
+vim.keymap.set("v", "<C-S-c>", '"+y')
 
--- Resize split windows using arrow keys
-kmap.set("n", "<c-up>", "<c-w>-", { desc = "Resize split window up" })
-kmap.set("n", "<c-down>", "<c-w>+", { desc = "Resize split window down" })
-kmap.set("n", "<c-right>", "<c-w>>", { desc = "Resize split window right" })
-kmap.set("n", "<c-left>", "<c-w><", { desc = "Resize split window left" })
+-- Find and replace (Ctrl+F for search, Ctrl+H for replace)
+vim.keymap.set("n", "<C-f>", "/")
+vim.keymap.set("n", "<C-h>", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
 
--- Undo Tree
-if vim.fn.exists(":UndotreeToggle") == 2 then
-    kmap.set("n", "<leader>ut", vim.cmd.UndotreeToggle, { desc = "Toggle UndoTree" })
-end
+-- Save file (Ctrl+S)
+vim.keymap.set("n", "<C-s>", ":w<CR>")
 
--- Basic spell checking mappings (simplified)
-kmap.set("n", "z=", "<cmd>spellsuggest<cr>", { desc = "Show spelling suggestions" })
-kmap.set("n", "<leader>ts", "<cmd>set spell!<cr>", { desc = "Toggle spell checking" })
+-- Close Neovim (Ctrl+Q)
+vim.keymap.set("n", "<C-q>", ":q<CR>")
 
--- CODE EXECUTION: Run code with code_runner
-kmap.set("n", "<leader>r", ":RunCode<CR>", { desc = "Run code" })
-kmap.set("n", "<leader>rf", ":RunFile<CR>", { desc = "Run current file" })
-kmap.set("n", "<leader>rp", ":RunProject<CR>", { desc = "Run project" })
-kmap.set("n", "<leader>rc", ":RunClose<CR>", { desc = "Close runner" })
+-- Format code (Alt+Shift+F)
+vim.keymap.set("n", "<A-S-f>", function()
+  vim.lsp.buf.format()
+end)
 
--- DEBUGGING: DAP keymaps
-kmap.set("n", "<leader>db", ":DapToggleBreakpoint<CR>", { desc = "Toggle breakpoint" })
-kmap.set("n", "<leader>dc", ":DapContinue<CR>", { desc = "Start/continue debugging" })
-kmap.set("n", "<leader>di", ":DapStepInto<CR>", { desc = "Step into" })
-kmap.set("n", "<leader>do", ":DapStepOver<CR>", { desc = "Step over" })
-kmap.set("n", "<leader>dt", ":DapTerminate<CR>", { desc = "Terminate debug session" })
-kmap.set("n", "<leader>du", ":lua require('dapui').toggle()<CR>", { desc = "Toggle DAP UI" })
+-- Navigate diagnostics (F8 for next, Shift+F8 for previous)
+vim.keymap.set("n", "<F8>", "<cmd>cnext<CR>zz")
+vim.keymap.set("n", "<S-F8>", "<cmd>cprev<CR>zz")
+
+-- Set file executable (Ctrl+E)
+vim.keymap.set("n", "<C-e>", "<cmd>!chmod +x %<CR>", { silent = true })

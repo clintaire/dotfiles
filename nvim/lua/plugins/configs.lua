@@ -1,7 +1,7 @@
 return {
-    require("plugins.configs.conform"),       -- Formatter
-    require("plugins.configs.lsp"),           -- LSP setup
-    require("plugins.configs.mason"),         -- Mason LSP & DAP servers
-    require("plugins.configs.nvim-cmp"),      -- Autocompletion
-    require("plugins.configs.treesitter"),    -- Treesitter syntax highlighting
+  require("plugins.configs.conform"),
+  require("plugins.configs.lsp"),
+  require("plugins.configs.mason"),
+  require("plugins.configs.nvim-cmp"),
+  require("plugins.configs.treesitter"),
 }
