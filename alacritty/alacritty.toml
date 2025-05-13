@@ -2,7 +2,7 @@
 #     ▓ ▓ Alacritty ▓ ▓ ▓ ▓
 
 # [general]
-general.import = ["~/.config/alacritty/themes/juno-ocean.toml"]
+general.import = ["~/.config/alacritty/themes/mocha.toml"]
 general.live_config_reload = true
 working_directory = "None"
 
