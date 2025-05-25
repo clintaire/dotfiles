@@ -1,0 +1,32 @@
+# ~/.config/i3blocks/config
+
+# Global properties
+separator=true
+separator_block_width=15
+markup=pango
+
+# Disk usage
+[disk]
+# More reliable direct command without depending on scripts
+command=df -h / | awk 'NR==2{printf "󰋊 %s\n", $4}'
+interval=30
+
+# Memory usage
+[memory]
+command=free -h | awk '/Mem:/ {printf "󰍛 %s/%s\n", $3, $2}'
+interval=5
+
+# CPU load
+[load]
+command=awk '{printf "󰻠 %.2f\n, $1"}' /proc/loadavg
+interval=5
+
+# Time
+[time]
+command=date '+%a %d %b %H:%M'
+interval=1
+
+# Battery
+[battery]
+command=acpi -b | awk -F'[,:%]' '{if ($2 == "Discharging") {print "󰁾 " $3"%"} else {print "󰂄 " $3"%"}}'
+interval=30

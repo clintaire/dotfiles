@@ -1,0 +1,45 @@
+{
+    "theme": "Adaptive.sublime-theme",
+    "color_scheme": "auto",
+
+    "ignored_packages": [
+        "Vintage",
+    ],
+    "font_face": "FiraCode Nerd Font",
+    "font_size": 11,
+    "line_padding_top": 2,
+    "line_padding_bottom": 2,
+    "highlight_line": true,
+    "caret_style": "smooth",
+    "caret_extra_top": 1,
+    "caret_extra_bottom": 1,
+
+    "word_wrap": false,
+    "translate_tabs_to_spaces": true,
+    "tab_size": 4,
+    "detect_indentation": true,
+    "trim_trailing_white_space_on_save": true,
+    "ensure_newline_at_eof_on_save": true,
+
+    "auto_complete": true,
+    "auto_complete_commit_on_tab": true,
+    "auto_complete_with_fields": true,
+    "auto_complete_triggers": [
+        {
+            "characters": "<",
+            "selector": "text.html, text.xml",
+        },
+        {
+            "selector": "punctuation.accessor",
+        },
+        {
+            "characters": "\\",
+            "selector": "text.tex.latex",
+        }
+    ],
+
+    "index_files": true,
+    "scroll_past_end": true,
+    "save_on_focus_lost": true,
+    "rulers": [80, 100],
+}
