@@ -3,7 +3,8 @@
 
 # [general]
 # general.import = ["~/.config/alacritty/themes/mocha.toml"]
-general.import = ["~/.config/alacritty/themes/custom.toml"]
+# general.import = ["~/.config/alacritty/themes/custom.toml"]
+general.import = ["~/.config/alacritty/themes/gruv.toml"]
 general.live_config_reload = true
 working_directory = "None"
 
@@ -51,12 +52,9 @@ bindings = [{ mouse = "Middle", action = "PasteSelection" }]
 
 [keyboard]
 bindings = [
-    { key = "V", mods = "Control|Shift", action = "Paste" },
-    { key = "C", mods = "Control|Shift", action = "Copy" },
-    { key = "N", mods = "Control|Shift", action = "SpawnNewInstance" },
-    { key = "F", mods = "Control|Shift", action = "ToggleFullscreen" },
-    { key = "T", mods = "Control|Shift", action = "CreateNewWindow" },
-    { key = "W", mods = "Control|Shift", action = "Quit" },
+    { key = "C", mods = "Control", action = "Copy" },
+    { key = "V", mods = "Control", action = "Paste" },
+    { key = "W", mods = "Control", action = "Quit" },
     { key = "PageUp", mods = "Control", action = "ScrollPageUp" },
     { key = "PageDown", mods = "Control", action = "ScrollPageDown" },
     { key = "Home", mods = "Control", action = "ScrollToTop" },

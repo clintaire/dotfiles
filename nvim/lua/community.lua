@@ -12,5 +12,6 @@ return {
   { import = "astrocommunity.colorscheme.catppuccin" },
   { import = "astrocommunity.pack.rust" },
   { import = "astrocommunity.pack.python" },
+  { import = "astrocommunity.recipes.picker-lsp-mappings" },
   -- import/override with your plugins folder
 }
