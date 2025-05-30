@@ -25,13 +25,14 @@ exec xinput set-prop "SYNA32EE:00 06CB:CFC5 Touchpad" "libinput Tapping Enabled"
 
 # External Display
 exec --no-startup-id xrandr --output DP-3 --auto --right-of eDP-1
+# exec --no-startup-id xrandr --output DP-3 --right-of eDP-1 --auto
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 # font pango:monospace 8
 
 # font pango:Tomorrow 10
-font pango:JetBrainsMono Nerd Font 10
+font pango:Noto Sans, Ubuntu Sans, JetBrainsMono Nerd Font 10
 gaps inner 20
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
@@ -209,13 +210,18 @@ bindsym $mod+r mode "resize"
 
 # ── Gruvbox Theme ────────────────────────────────────
 bar {
+    
+    tray_output DP-3
+    # tray_output eDP-1
+
     status_command i3blocks -c ~/.config/i3blocks/config
-	    # status_command i3status --config ~/.config/i3status/config
+        # status_command i3status --config ~/.config/i3status/config
         font pango:JetBrainsMono Nerd Font 10
         tray_output primary
         position bottom
 
-        colors {
+
+    colors {
         background #1E1F22
         statusline #CDD6F4
         separator  #1E1E2E
@@ -246,3 +252,9 @@ bindsym Control+Mod1+s exec subl                                                
 
 # Wallpaper with Feh
 exec_always --no-startup-id feh --randomize --bg-fill /home/focus/.config/i3/wallpaper/*
+
+# Brave Browser Behavior
+for_window [class="Brave"] floating disable
+# for_window [class="Brave"] border normal
+# for_window [class="Brave"] focus
+# assign [class="Brave"] $ws3
