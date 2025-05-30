@@ -1,0 +1,31 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-family: Fantasque Sans Mono, monospace;
+  font-size: 14px;
+  min-height: 0;
+}
+
+window#waybar {
+  background-color: #282828;
+  color: #ebdbb2;
+}
+
+#workspaces button {
+  padding: 0 5px;
+  color: #a89984;
+}
+
+#workspaces button.active {
+  background-color: #458588;
+  color: #282828;
+}
+
+#clock,
+#pulseaudio,
+#network,
+#bluetooth,
+#battery,
+#tray {
+  padding: 0 10px;
+}
