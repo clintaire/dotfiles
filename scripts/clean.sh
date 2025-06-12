@@ -4,7 +4,7 @@
 
 # Usage: ./clean.sh /path/to/directory
 if [ -z "$1" ]; then
-    echo "Usage: $0 /path/to/directory"
+    echo "Usage: $0 ./clean.sh /path/to/directory"
     exit 1
 fi
 

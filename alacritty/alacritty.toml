@@ -4,7 +4,7 @@
 # [general]
 # general.import = ["~/.config/alacritty/themes/mocha.toml"]
 # general.import = ["~/.config/alacritty/themes/custom.toml"]
-general.import = ["~/.config/alacritty/themes/red.toml"]
+general.import = ["~/.config/alacritty/themes/rust.toml"]
 general.live_config_reload = true
 working_directory = "None"
 
@@ -14,7 +14,7 @@ dynamic_padding = true
 decorations = "None"
 resize_increments = true
 
-# opacity = 0.85
+# opacity = 0.90
 
 startup_mode = "Maximized"
 title = "Alacritty - {shell}"
@@ -23,10 +23,10 @@ decorations_theme_variant = "None"
 option_as_alt = "Both"
 
 [font]
-normal = { family = "MonaspiceKr Nerd Font", style = "Regular" }
-bold = { family = "MonaspiceKr Nerd Font", style = "Bold" }
-italic = { family = "MonaspiceKr Nerd Font", style = "Italic" }
-bold_italic = { family = "MonaspiceKr Nerd Font", style = "Bold Italic" }
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
 
 size = 12.12
 builtin_box_drawing = true
@@ -58,9 +58,9 @@ bindings = [{ mouse = "Middle", action = "PasteSelection" }]
 
 [keyboard]
 bindings = [
-    { key = "C", mods = "Control", action = "Copy" },
-    { key = "V", mods = "Control", action = "Paste" },
-    { key = "W", mods = "Control", action = "Quit" },
+    { key = "C", mods = "Control|Shift", action = "Copy" },
+    { key = "V", mods = "Control|Shift", action = "Paste" },
+    { key = "W", mods = "Control|Shift", action = "Quit" },
     { key = "PageUp", mods = "Control", action = "ScrollPageUp" },
     { key = "PageDown", mods = "Control", action = "ScrollPageDown" },
     { key = "Home", mods = "Control", action = "ScrollToTop" },
@@ -75,8 +75,8 @@ bindings = [
     { key = "L", mods = "Control|Shift", action = "ClearHistory" },
     { key = "Q", mods = "Control", action = "Quit" },
     { key = "Tab", mods = "Control|Shift", action = "ToggleViMode" },
-    { key = "/", mods = "Control|Shift", action = "SearchForward" },
-    { key = "?", mods = "Control|Shift", action = "SearchBackward" },
+    { key = "<", mods = "Control|Shift", action = "SearchForward" },
+    { key = ">", mods = "Control|Shift", action = "SearchBackward" },
 ]
 
 [scrolling]

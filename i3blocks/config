@@ -1,0 +1,14 @@
+# ~/.config/i3blocks/config
+
+# Global properties
+separator=true
+separator_block_width=1
+markup=pango
+
+[time]
+command=date '+%a %b %d %H:%M'
+interval=1
+
+[battery]
+command=acpi -b | awk -F'[,:%]' '{print $3"%"}'
+interval=30
