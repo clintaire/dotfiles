@@ -34,12 +34,23 @@ exec xinput set-prop "SYNA32EE:00 06CB:CFC5 Touchpad" "libinput Tapping Enabled"
 
 # External Display MacStudio
 # Comment out to use just the external display
-exec --no-startup-id xrandr --output DP-3 --primary --mode 5120x2880 --pos 0x0 --output eDP-1 --mode 2880x1800 --right-of DP-3 --pos 5120x0 --auto
+
+# ﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏ALIGN DISPLAY﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
+# Studio Display as Primary with PC to the left <<
+# exec --no-startup-id xrandr --output DP-3 --primary --mode 5120x2880 --pos 0x0 --output eDP-1 --mode 2880x1800 --left-of DP-3 --pos 5120x0 --auto
+
+# exec --no-startup-id xrandr --output DP-3 --primary --mode 5120x2880 --output eDP-1 --mode 2880x1800 --left-of DP-3 --auto
+
+# PC as Primary and Studio Display to the right >>
+# exec --no-startup-id xrandr --output eDP-1 --primary --mode 2880x1800 --pos 0x0 --output DP-3 --mode 5120x2880 --right-of eDP-1 --pos 5120x0 --auto
+
+exec --no-startup-id xrandr --output eDP-1 --primary --mode 2880x1800 --output DP-3 --mode 5120x2880 --right-of eDP-1 --auto
+
+# ﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏END ALIGN DISPLAY﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏
 
 # Internal Display Laptop
 #  Comment out to use just the internal display
 # exec --no-startup-id xrandr --output eDP-1 --primary --mode 2880x1800 --auto
-
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -260,6 +271,7 @@ bindsym Control+Mod1+slash exec alacritty
 bindsym Control+Mod1+o exec obsidian
 bindsym Control+Mod1+d exec discord
 bindsym Control+Mod1+b exec blender
+bindsym Control+Mod1+s exec env GDK_SCALE=1 GDK_DPI_SCALE=1 subl
 bindsym Control+Mod1+x exec texstudio
 bindsym Control+Mod1+v exec code
 bindsym Control+Mod1+m exec dolphin

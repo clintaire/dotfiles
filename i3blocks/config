@@ -12,3 +12,8 @@ interval=1
 [battery]
 command=acpi -b | awk -F'[,:%]' '{print $3"%"}'
 interval=30
+
+[bluetooth]
+label=
+interval=10
+
