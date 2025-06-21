@@ -4,7 +4,7 @@
 # [general]
 # general.import = ["~/.config/alacritty/themes/mocha.toml"]
 # general.import = ["~/.config/alacritty/themes/custom.toml"]
-general.import = ["~/.config/alacritty/themes/rust.toml"]
+general.import = ["~/.config/alacritty/themes/juno-ocean.toml"]
 general.live_config_reload = true
 working_directory = "None"
 
