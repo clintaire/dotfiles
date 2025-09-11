@@ -26,10 +26,10 @@ git clone https://github.com/clintaire/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
 # Basic install (just configs, no packages)
-./install.sh
+./.system/install.sh
 
 # Full install (includes package installation - Arch Linux only)
-./install.sh --full
+./.system/install.sh --full
 ```
 
 ## Installation Options
@@ -39,27 +39,25 @@ The installation scripts provide several options:
 1. **Basic Installation**: Links configuration files to their appropriate locations
 
    ```bash
-   ./install.sh
+   ./.system/install.sh
    ```
 
 2. **Full Installation**: Includes package installation with interactive options
 
    ```bash
-   ./install.sh --full
+   ./.system/install.sh --full
    ```
 
-   This will prompt you whether to use the interactive app installation script.
-
-3. **Interactive App Installation**: The `scripts/apps.sh` script provides a detailed, interactive
-   installation process that:
-
-   - Asks for confirmation before installing each category of applications
-   - Checks for already installed packages to avoid conflicts
-   - Uses yay as the package manager
-   - Provides clear organization of package categories
+3. **Sync Local Changes**: Update dotfiles with current system configurations
 
    ```bash
-   ./scripts/apps.sh
+   ./.system/sync_dotfiles.sh
+   ```
+
+4. **Restore on New System**: Restore configurations from dotfiles repository
+
+   ```bash
+   ./.system/restore_dotfiles.sh
    ```
 
 ## Security
@@ -67,7 +65,7 @@ The installation scripts provide several options:
 Before committing any changes to your dotfiles repository, run the sanitize script to check for sensitive information:
 
 ```bash
-./sanitize.sh
+./.system/sanitize.sh
 ```
 
 ## Manual Configuration
@@ -100,13 +98,19 @@ If you prefer to install components individually:
 
 ## Directory Structure
 
-- **i3/**: Window manager configuration
-- **kitty/**: Terminal emulator configuration
-- **picom/**: Compositor settings with transparency rules
-- **sddm/**: Display manager themes and configuration
-- **scripts/**: Utility scripts for system setup and maintenance
-  - **apps.sh**: Interactive application installation script
-  - **clean.sh**: Cleanup script for temporary files
-  - **install.sh**: Main installation script
+- **.config/**: User configuration files
+  - **hypr/**: Hyprland window manager configuration
+  - **i3/**: i3 window manager configuration  
+  - **kitty/**: Terminal emulator configuration
+  - **rofi/**: Application launcher configuration
+  - **waybar/**: Status bar configuration
+  - **picom/**: Compositor settings with transparency rules
+  - **dunst/**: Notification daemon configuration
+  - **zsh/**: Shell configuration and themes
+- **.system/**: System management scripts
+  - **install.sh**: Main installation script with package dependencies
+  - **restore_dotfiles.sh**: Script to restore configurations from repository
+  - **sync_dotfiles.sh**: Comprehensive backup and sync script
   - **sanitize.sh**: Script to check for sensitive information
-- **zsh/**: Shell configuration files and themes
+- **system/**: System-wide configuration backups (GRUB, packages, etc.)
+- Root configuration files: .zshrc, .xinitrc, .Xresources, .zprofile

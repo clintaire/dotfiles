@@ -47,3 +47,23 @@ browser[type="content"] {
   color: var(--fg) !important;
   border: 1px solid var(--accent) !important;
 }
+
+/* Firefox sidebar - only what you asked for */
+#sidebar-box {
+  background: var(--bg) !important;
+}
+
+#sidebar {
+  background: var(--bg) !important;
+  color: var(--fg) !important;
+}
+
+#sidebar-header {
+  background: rgba(14, 20, 25, 0.8) !important;
+  color: var(--fg) !important;
+}
+
+.sidebar-panel {
+  background: var(--bg) !important;
+  color: var(--fg) !important;
+}
