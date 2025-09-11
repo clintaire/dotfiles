@@ -1,0 +1,15 @@
+/**
+ *
+ * Custom System Colors
+ * Matching your system theme
+ *
+ **/
+
+* {
+    background:     #0e1419;
+    background-alt: #243340;
+    foreground:     #e5e1cf;
+    selected:       #f19618;
+    active:         #f19618;
+    urgent:         #ff5555;
+}

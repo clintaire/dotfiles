@@ -1,0 +1,55 @@
+# i3blocks configuration
+# Clean clickable status bar
+
+separator_block_width=30
+markup=pango
+
+[network]
+command=~/.config/i3blocks/network
+interval=5
+color=#e5e1cf
+
+[removable]
+command=~/.config/i3blocks/removable
+interval=5
+color=#b8cc52
+
+[battery]
+command=~/.config/i3blocks/battery
+interval=10
+color=#e5e1cf
+
+[disk]
+command=echo "󰋊 $(df -h / | tail -1 | awk '{print $4}')"
+interval=30
+color=#e5e1cf
+
+[cpu]
+command=echo "󰍛 $(grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print int(usage)}')%"
+interval=5
+color=#e5e1cf
+
+[memory]
+command=echo "󰘚 $(free -h | awk '/^Mem:/ {print $3}')"
+interval=5
+color=#e5e1cf
+
+[temperature]
+command=echo "󰈐 $(cat /sys/class/thermal/thermal_zone0/temp | awk '{print int($1/1000)}')°C"
+interval=5
+color=#e5e1cf
+
+[bluetooth]
+command=~/.config/i3blocks/bluetooth
+interval=5
+color=#36a3d9
+
+[volume]
+command=pactl get-sink-volume @DEFAULT_SINK@ | awk '{print "󰕾 " $5}' | head -1
+interval=1
+color=#e5e1cf
+
+[date]
+command=~/.config/i3blocks/date
+interval=5
+color=#e5e1cf

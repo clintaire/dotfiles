@@ -1,0 +1,3 @@
+#!/bin/bash
+# Use i3-dmenu-desktop for cleaner app list (only shows .desktop applications)
+exec i3-dmenu-desktop --dmenu="/usr/bin/dmenu -nb '#0e1419' -nf '#e5e1cf' -sb '#f19618' -sf '#0e1419' -fn 'JetBrainsMono Nerd Font:size=12' -i"

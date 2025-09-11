@@ -1,0 +1,23 @@
+#!/bin/bash
+
+BAT_PATH="/sys/class/power_supply/BAT0"
+if [ ! -d "$BAT_PATH" ]; then
+    BAT_PATH="/sys/class/power_supply/BAT1"
+fi
+
+if [ -d "$BAT_PATH" ]; then
+    CAPACITY=$(cat $BAT_PATH/capacity 2>/dev/null || echo "N/A")
+    STATUS=$(cat $BAT_PATH/status 2>/dev/null || echo "Unknown")
+    
+    case $STATUS in
+        "Charging") ICON="󰂄" ;;
+        "Discharging") ICON="󰁹" ;;
+        "Full") ICON="󰁹" ;;
+        "Not charging") ICON="󰁹" ;;
+        *) ICON="󰂑" ;;
+    esac
+    
+    echo "$ICON $CAPACITY%"
+else
+    echo "󰂑 N/A"
+fi

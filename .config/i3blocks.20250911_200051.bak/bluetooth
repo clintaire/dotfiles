@@ -1,0 +1,8 @@
+#!/bin/bash
+
+case $BLOCK_BUTTON in
+    1) ~/.config/polybar/bluetooth-menu.sh ;;
+    3) ~/.config/polybar/bluetooth-menu.sh ;;
+esac
+
+bluetoothctl show | grep -q "Powered: yes" && echo "󰂯" || echo "󰂯"

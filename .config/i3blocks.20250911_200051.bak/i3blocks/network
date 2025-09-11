@@ -1,0 +1,22 @@
+#!/bin/bash
+
+case $BLOCK_BUTTON in
+    1) ~/.config/polybar/network-menu.sh ;;
+    3) ~/.config/polybar/network-menu.sh ;;
+esac
+
+# Get wifi info using nmcli
+WIFI_INFO=$(nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi | grep '^yes' | head -1)
+if [ -n "$WIFI_INFO" ]; then
+    SSID=$(echo $WIFI_INFO | cut -d: -f2)
+    SIGNAL=$(echo $WIFI_INFO | cut -d: -f3)
+    echo "󰤨 $SSID $SIGNAL%"
+else
+    # Check ethernet
+    ETH_STATE=$(nmcli dev status | grep ethernet | awk '{print $3}' | head -1)
+    if [ "$ETH_STATE" = "connected" ]; then
+        echo "󰈀 connected"
+    else
+        echo "󰤭 disconnected"
+    fi
+fi

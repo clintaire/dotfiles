@@ -1,4 +1,22 @@
 #!/usr/bin/env python3
+"""
+PDF Duplicate File Manager
+
+This script finds and manages duplicate PDF files in a directory based on content hash.
+It supports multiple strategies for choosing which duplicate to keep and provides
+a safe dry-run mode for testing.
+
+Improvements made:
+- Added comprehensive error handling
+- Removed all emoji/icon characters
+- Added progress indicators
+- Improved documentation and type hints
+- Enhanced user feedback
+- Better file path formatting
+- Robust duplicate handling strategies
+
+Author: Script improved for better reliability and usability
+"""
 import argparse
 import datetime
 import hashlib
@@ -8,22 +26,46 @@ import shutil
 
 # Script to find and manage duplicate PDF files in a directory
 def calculate_file_hash(file_path):
-    """Calculate a SHA-256 hash of file content."""
-    hash_obj = hashlib.sha256()
-    with open(file_path, "rb") as file:
-        # Read the file in chunks to handle large files efficiently
-        for chunk in iter(lambda: file.read(4096), b""):
-            hash_obj.update(chunk)
-    return hash_obj.hexdigest()
+    """Calculate a SHA-256 hash of file content.
+
+    Args:
+        file_path (str): Path to the file to hash
+
+    Returns:
+        str: SHA-256 hash of the file content
+
+    Raises:
+        IOError: If the file cannot be read
+    """
+    try:
+        hash_obj = hashlib.sha256()
+        with open(file_path, "rb") as file:
+            # Read the file in chunks to handle large files efficiently
+            for chunk in iter(lambda: file.read(4096), b""):
+                hash_obj.update(chunk)
+        return hash_obj.hexdigest()
+    except (IOError, OSError) as e:
+        raise IOError(f"Cannot read file {file_path}: {e}")
 
 
 def find_pdf_files(directory):
-    """Find all PDF files in a directory and its subdirectories."""
+    """Find all PDF files in a directory and its subdirectories.
+
+    Args:
+        directory (str): Directory path to scan
+
+    Returns:
+        list: List of PDF file paths
+    """
     pdf_files = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.lower().endswith(".pdf"):
-                pdf_files.append(os.path.join(root, file))
+    try:
+        for root, _, files in os.walk(directory):
+            for file in files:
+                if file.lower().endswith(".pdf"):
+                    pdf_files.append(os.path.join(root, file))
+    except (IOError, OSError) as e:
+        print(f"Error scanning directory {directory}: {e}")
+        return []
     return pdf_files
 
 
@@ -31,19 +73,31 @@ def find_duplicates(pdf_files, keep_strategy="newest"):
     """Find duplicate PDF files based on content hash.
 
     Args:
-        pdf_files: List of PDF file paths
-        keep_strategy: Which file to keep when duplicates are found
+        pdf_files (list): List of PDF file paths
+        keep_strategy (str): Which file to keep when duplicates are found
                       - 'newest': Keep the most recently modified file
                         (default)
                       - 'oldest': Keep the oldest file
                       - 'shortest_path': Keep the file with shortest path
                       - 'longest_path': Keep the file with longest path
+
+    Returns:
+        list: List of tuples (duplicate_file, original_file)
     """
     file_hashes = {}
     duplicates = []
 
-    for file_path in pdf_files:
-        file_hash = calculate_file_hash(file_path)
+    print(f"Processing {len(pdf_files)} files...")
+
+    for i, file_path in enumerate(pdf_files, 1):
+        if i % 10 == 0 or i == len(pdf_files):
+            print(f"  Progress: {i}/{len(pdf_files)} files processed")
+
+        try:
+            file_hash = calculate_file_hash(file_path)
+        except IOError as e:
+            print(f"Warning: Skipping file due to error - {e}")
+            continue
 
         if file_hash in file_hashes:
             # This is a duplicate - determine which to keep based on strategy
@@ -51,22 +105,28 @@ def find_duplicates(pdf_files, keep_strategy="newest"):
 
             # Decide if we should swap which file is considered "original"
             if keep_strategy == "newest":
-                orig_mtime = os.path.getmtime(original_file)
-                dup_mtime = os.path.getmtime(file_path)
-                if dup_mtime > orig_mtime:
-                    # The "duplicate" is actually newer, so swap them
-                    duplicates.append((original_file, file_path))
-                    file_hashes[file_hash] = file_path
-                    continue
+                try:
+                    orig_mtime = os.path.getmtime(original_file)
+                    dup_mtime = os.path.getmtime(file_path)
+                    if dup_mtime > orig_mtime:
+                        # The "duplicate" is actually newer, so swap them
+                        duplicates.append((original_file, file_path))
+                        file_hashes[file_hash] = file_path
+                        continue
+                except OSError:
+                    print("Warning: Cannot get modification time for files")
 
             elif keep_strategy == "oldest":
-                orig_mtime = os.path.getmtime(original_file)
-                dup_mtime = os.path.getmtime(file_path)
-                if dup_mtime < orig_mtime:
-                    # The "duplicate" is actually older, so swap them
-                    duplicates.append((original_file, file_path))
-                    file_hashes[file_hash] = file_path
-                    continue
+                try:
+                    orig_mtime = os.path.getmtime(original_file)
+                    dup_mtime = os.path.getmtime(file_path)
+                    if dup_mtime < orig_mtime:
+                        # The "duplicate" is actually older, so swap them
+                        duplicates.append((original_file, file_path))
+                        file_hashes[file_hash] = file_path
+                        continue
+                except OSError:
+                    print("Warning: Cannot get modification time for files")
 
             elif keep_strategy == "shortest_path":
                 if len(file_path) < len(original_file):
@@ -99,44 +159,59 @@ def create_duplicates_folder(directory):
 
 
 def move_duplicates(duplicates, target_dir):
-    """Move duplicate files to the target directory."""
+    """Move duplicate files to the target directory.
+
+    Args:
+        duplicates (list): List of tuples (duplicate_file, original_file)
+        target_dir (str): Directory to move duplicate files to
+
+    Returns:
+        list: List of dictionaries containing information about moved files
+    """
     moved_files = []
 
     for duplicate_file, original_file in duplicates:
-        # Get just the filename without the path
-        filename = os.path.basename(duplicate_file)
+        try:
+            # Get just the filename without the path
+            filename = os.path.basename(duplicate_file)
 
-        # Create a unique name with more information
-        dup_dirname = os.path.basename(os.path.dirname(duplicate_file))
-        orig_filename = os.path.basename(original_file)
-        base_name = os.path.splitext(filename)[0]
-        ext = os.path.splitext(filename)[1]
+            # Create a unique name with more information
+            dup_dirname = os.path.basename(os.path.dirname(duplicate_file))
+            base_name = os.path.splitext(filename)[0]
+            ext = os.path.splitext(filename)[1]
 
-        new_filename = f"{base_name}_from_{dup_dirname}{ext}"
-        counter = 1
+            new_filename = f"{base_name}_from_{dup_dirname}{ext}"
+            counter = 1
 
-        # Ensure the filename is unique
-        while os.path.exists(os.path.join(target_dir, new_filename)):
-            new_filename = f"{base_name}_from_{dup_dirname}_{counter}{ext}"
-            counter += 1
+            # Ensure the filename is unique
+            while os.path.exists(os.path.join(target_dir, new_filename)):
+                new_filename = f"{base_name}_from_{dup_dirname}_{counter}{ext}"
+                counter += 1
 
-        dest_path = os.path.join(target_dir, new_filename)
+            dest_path = os.path.join(target_dir, new_filename)
 
-        # Store info before moving
-        moved_files.append(
-            {
-                "from": duplicate_file,
-                "to": dest_path,
-                "original": original_file,
-                "size": os.path.getsize(duplicate_file),
-                "mtime": datetime.datetime.fromtimestamp(
-                    os.path.getmtime(duplicate_file)
-                ).strftime("%Y-%m-%d %H:%M:%S"),
-            }
-        )
+            # Store info before moving
+            file_size = os.path.getsize(duplicate_file)
+            mtime = datetime.datetime.fromtimestamp(
+                os.path.getmtime(duplicate_file)
+            ).strftime("%Y-%m-%d %H:%M:%S")
 
-        # Move the file
-        shutil.move(duplicate_file, dest_path)
+            moved_files.append(
+                {
+                    "from": duplicate_file,
+                    "to": dest_path,
+                    "original": original_file,
+                    "size": file_size,
+                    "mtime": mtime,
+                }
+            )
+
+            # Move the file
+            shutil.move(duplicate_file, dest_path)
+
+        except (IOError, OSError) as e:
+            print(f"Error moving file {duplicate_file}: {e}")
+            continue
 
     return moved_files
 
@@ -145,25 +220,39 @@ def format_file_path(path, base_dir):
     """
     Format a file path for display.
     Show it relative to base_dir if possible.
+
+    Args:
+        path (str): File path to format
+        base_dir (str): Base directory for relative path calculation
+
+    Returns:
+        str: Formatted file path
     """
     try:
         rel_path = os.path.relpath(path, base_dir)
         if not rel_path.startswith(".."):
             return rel_path
-    except Exception as e:
+    except (ValueError, TypeError):
         pass
     return path
 
 
 def print_duplicates_summary(duplicates, base_dir):
-    """Print a summary of duplicate files found."""
+    """Print a summary of duplicate files found.
+
+    Args:
+        duplicates (list): List of tuples (duplicate_file, original_file)
+        base_dir (str): Base directory for relative path display
+    """
     if not duplicates:
-        print("\n✅ No duplicate files found.")
+        print("\nNo duplicate files found.")
         return
 
     total_size = sum(os.path.getsize(dup[0]) for dup in duplicates)
+    size_mb = total_size / (1024*1024)
     print(
-        f"\n🔍 Found {len(duplicates)} duplicate files (total size: {total_size / (1024*1024):.2f} MB)"
+        f"\nFound {len(duplicates)} duplicate files "
+        f"(total size: {size_mb:.2f} MB)"
     )
 
     # Group by original file
@@ -175,7 +264,7 @@ def print_duplicates_summary(duplicates, base_dir):
 
     print("\nDuplicates grouped by original file:")
     for orig, dups in by_original.items():
-        print(f"\n  📄 Original: {format_file_path(orig, base_dir)}")
+        print(f"\n  Original: {format_file_path(orig, base_dir)}")
         for dup in dups:
             print(f"      - {format_file_path(dup, base_dir)}")
 
@@ -221,7 +310,7 @@ def main():
         return
 
     if args.dry_run:
-        print("\n⚠️ DRY RUN - No files were moved")
+        print("\nDRY RUN - No files were moved")
         return
 
     # Ask for confirmation before proceeding
@@ -236,14 +325,17 @@ def main():
     moved_files = move_duplicates(duplicates, duplicates_dir)
 
     # Print summary of moved files
-    print(f"\n✅ Moved {len(moved_files)} duplicate files to {duplicates_dir}")
+    print(f"\nMoved {len(moved_files)} duplicate files to {duplicates_dir}")
     print("\nMoved files:")
     for file in moved_files:
-        print(
-            f"  • {format_file_path(file['from'], directory)} → {os.path.basename(file['to'])}"
-        )
-        print(f"    (duplicate of: {format_file_path(file['original'], directory)})")
-        print(f"    Size: {file['size'] / 1024:.1f} KB, Modified: {file['mtime']}")
+        from_path = format_file_path(file['from'], directory)
+        to_name = os.path.basename(file['to'])
+        orig_path = format_file_path(file['original'], directory)
+        size_kb = file['size'] / 1024
+
+        print(f"  - {from_path} -> {to_name}")
+        print(f"    (duplicate of: {orig_path})")
+        print(f"    Size: {size_kb:.1f} KB, Modified: {file['mtime']}")
 
 
 if __name__ == "__main__":

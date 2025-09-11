@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Set up NVIDIA as the primary GPU
+xrandr --setprovideroutputsource modesetting NVIDIA-0
+xrandr --auto
+
+# Start i3 window manager
+exec i3

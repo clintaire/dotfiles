@@ -1,125 +1,47 @@
-# System files
-.DS_Store
-.AppleDouble
-.LSOverride
+# Sensitive information
+.env
+**/secrets/
+*_secret.*
+*_private.*
+*.key
+*.pem
+*.crt
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Python
+# Cache files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
-venv/
-.env/
-.pytest_cache/
-.coverage
-htmlcov/
+.cache/
 
-# JavaScript/Node
-node_modules/
+# Package files
+*.tar
+*.gz
+*.zip
+*.tgz
+
+# System files
+.DS_Store
+.directory
+.Trash-*
+Thumbs.db
+desktop.ini
+
+# History and logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-dist/
-build/
+.bash_history
+.zsh_history
+.lesshst
+.viminfo
+.python_history
 
-# R
-.RData
-.Rhistory
-.Rproj.user/
-*.Rproj
-.Renviron
-Rplots.pdf
-*.rds
-packrat/
-renv/
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Rust
-target/
-Cargo.lock
-**/*.rs.bk
-debug/
-release/
-
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-target/
-.classpath
-.project
-.settings/
-
-# C/C++
-*.o
-*.ko
-*.obj
-*.elf
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-*.dSYM/
-
-# Output files
-**/output/*.pdf
-**/output/*.csv
-**/output/*.xlsx
-**/output/*.png
-**/output/*.jpg
-
-# LaTeX
-*.aux
-*.lof
-*.log
-*.lot
-*.fls
-*.out
-*.toc
-*.fmt
-*.fot
-*.cb
-*.cb2
-.*.lb
-*.dvi
-*.xdv
-*-converted-to.*
-*.bbl
-*.bcf
-*.blg
-*-blx.*
-*.run.xml
-*.fdb_latexmk
-*.synctex
-*.synctex(busy)
-*.synctex.gz
-*.synctex.gz(busy)
-*.pdfsync
-latex.out/
-**/out/*.pdf
-
-# LaTeX additional patterns
-*.nav
-*.snm
-*.vrb
-_minted*/
-*.pyg
-*.eps
-*.tdo
-
-# Coverage reports
-coverage/
-*.lcov
-.nyc_output/
+# Custom files with potential sensitive data
+zsh/private.zsh
+.ssh/config

@@ -1,0 +1,51 @@
+# Ayu Dark GRUB Theme
+# Based on ayu color scheme with JetBrains Mono Nerd Font
+
+# Global Properties
+title-text: ""
+desktop-color: "#0e1419"
+terminal-font: "jetbrains-mono-16"
+terminal-width: "100%"
+terminal-height: "100%"
+terminal-border: "0"
+
+# Boot Menu
++ boot_menu {
+  left = 25%
+  top = 25%
+  width = 50%
+  height = 50%
+  item_font = "jetbrains-mono-16"
+  item_color = "#e5e1cf"
+  selected_item_color = "#f19618"
+  icon_width = 32
+  icon_height = 32
+  item_icon_space = 20
+  item_height = 40
+  item_padding = 8
+  item_spacing = 12
+  selected_item_pixmap_style = "select_*.png"
+}
+
+# Timeout Label
++ label {
+  top = 80%
+  left = 25%
+  width = 50%
+  align = "center"
+  id = "__timeout__"
+  text = "Booting in %d seconds"
+  color = "#95e5cb"
+  font = "jetbrains-mono-16"
+}
+
+# Title Label
++ label {
+  top = 15%
+  left = 25%
+  width = 50%
+  align = "center"
+  text = "Arch Linux"
+  color = "#36a3d9"
+  font = "jetbrains-mono-16"
+}

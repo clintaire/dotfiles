@@ -1,0 +1,13 @@
+adwaita-dark
+anki-bin
+arc-gtk-theme
+clipman
+clipman-debug
+obsidian-bin
+thunderbird-bin
+ttf-meslo
+ttf-ms-win11-auto
+wlogout
+wlogout-debug
+yay
+yay-debug

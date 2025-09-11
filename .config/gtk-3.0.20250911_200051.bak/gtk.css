@@ -1,0 +1,189 @@
+/* Ayu Dark Theme for Thunar File Manager */
+
+/* Main window background */
+.thunar window {
+    background-color: #0e1419;
+    color: #e5e1cf;
+}
+
+/* Toolbar styling */
+.thunar toolbar {
+    background-color: #0e1419;
+    border-bottom: 1px solid #243340;
+    color: #e5e1cf;
+}
+
+.thunar toolbar button {
+    background-color: transparent;
+    color: #e5e1cf;
+    border: none;
+    padding: 8px;
+}
+
+.thunar toolbar button:hover {
+    background-color: #243340;
+    color: #f19618;
+}
+
+.thunar toolbar button:active {
+    background-color: #36a3d9;
+    color: #0e1419;
+}
+
+/* Sidebar styling */
+.thunar .sidebar {
+    background-color: #0b1014;
+    color: #e5e1cf;
+    border-right: 1px solid #243340;
+}
+
+.thunar .sidebar row {
+    color: #e5e1cf;
+}
+
+.thunar .sidebar row:hover {
+    background-color: #243340;
+    color: #f19618;
+}
+
+.thunar .sidebar row:selected {
+    background-color: #36a3d9;
+    color: #0e1419;
+}
+
+/* Main file view area */
+.thunar .view {
+    background-color: #0e1419;
+    color: #e5e1cf;
+}
+
+/* File list items */
+.thunar iconview {
+    background-color: #0e1419;
+    color: #e5e1cf;
+}
+
+.thunar iconview:selected {
+    background-color: #f19618;
+    color: #0e1419;
+}
+
+.thunar treeview {
+    background-color: #0e1419;
+    color: #e5e1cf;
+}
+
+.thunar treeview:selected {
+    background-color: #f19618;
+    color: #0e1419;
+}
+
+/* Headers */
+.thunar treeview.view header button {
+    background-color: #243340;
+    color: #e5e1cf;
+    border: 1px solid #0e1419;
+}
+
+.thunar treeview.view header button:hover {
+    background-color: #36a3d9;
+    color: #0e1419;
+}
+
+/* Status bar */
+.thunar statusbar {
+    background-color: #0b1014;
+    color: #95e5cb;
+    border-top: 1px solid #243340;
+}
+
+/* Menu bar */
+.thunar menubar {
+    background-color: #0e1419;
+    color: #e5e1cf;
+}
+
+.thunar menubar > menuitem {
+    color: #e5e1cf;
+}
+
+.thunar menubar > menuitem:hover {
+    background-color: #243340;
+    color: #f19618;
+}
+
+/* Context menus */
+.thunar menu {
+    background-color: #0e1419;
+    color: #e5e1cf;
+    border: 1px solid #243340;
+}
+
+.thunar menu menuitem {
+    color: #e5e1cf;
+}
+
+.thunar menu menuitem:hover {
+    background-color: #243340;
+    color: #f19618;
+}
+
+/* Entry fields (location bar, etc.) */
+.thunar entry {
+    background-color: #243340;
+    color: #e5e1cf;
+    border: 1px solid #36a3d9;
+}
+
+.thunar entry:focus {
+    border-color: #f19618;
+    box-shadow: 0 0 3px #f19618;
+}
+
+/* Scrollbars */
+.thunar scrollbar {
+    background-color: #0e1419;
+}
+
+.thunar scrollbar slider {
+    background-color: #243340;
+    border-radius: 10px;
+}
+
+.thunar scrollbar slider:hover {
+    background-color: #36a3d9;
+}
+
+/* Path bar buttons */
+.thunar .path-bar button {
+    background-color: transparent;
+    color: #e5e1cf;
+    border: none;
+}
+
+.thunar .path-bar button:hover {
+    background-color: #243340;
+    color: #f19618;
+}
+
+.thunar .path-bar button:active {
+    background-color: #36a3d9;
+    color: #0e1419;
+}
+
+/* Generic buttons */
+.thunar button {
+    background-color: #243340;
+    color: #e5e1cf;
+    border: 1px solid #36a3d9;
+}
+
+.thunar button:hover {
+    background-color: #36a3d9;
+    color: #0e1419;
+}
+
+.thunar button:active {
+    background-color: #f19618;
+    color: #0e1419;
+}

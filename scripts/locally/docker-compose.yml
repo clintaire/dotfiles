@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Redis service for redis-session.py
+  redis:
+    image: redis:alpine
+    container_name: mini_app_redis
+    command: redis-server --maxmemory 50mb --maxmemory-policy allkeys-lru --save "" --appendonly no
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  # Alpine container with Python for running any of the session managers
+  session-runner:
+    image: python:3.9-alpine
+    container_name: session_runner
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: >
+      sh -c "pip install redis &&
+             echo 'Session manager is ready!' &&
+             echo 'Run one of the following:' &&
+             echo '- python redis-session.py' &&
+             echo '- python file-session.py' &&
+             echo '- python memory-session.py' &&
+             tail -f /dev/null"
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
+    driver: local
