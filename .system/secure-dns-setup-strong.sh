@@ -579,7 +579,7 @@ nameserver 8.8.8.8
 EOF
 
     if command -v pacman &> /dev/null; then
-        sudo pacman -S --noconfirm dnscrypt-proxy stubby netcat-openbsd dnsutils
+        sudo pacman -S --noconfirm dnscrypt-proxy stubby gnu-netcat dnsutils
     elif command -v apt &> /dev/null; then
         sudo apt update
         sudo apt install -y dnscrypt-proxy stubby netcat-openbsd dnsutils
