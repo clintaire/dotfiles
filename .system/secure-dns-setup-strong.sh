@@ -295,12 +295,14 @@ update_routing_table() {
     # Adjust based on service states
     if [[ ${SERVICE_STATES[dnscrypt]} != "HEALTHY" ]]; then
         ROUTE_WEIGHTS[primary]=0
-        ROUTE_WEIGHTS[secondary]=$((${ROUTE_WEIGHTS[secondary]} + 35))
+        local add_weight=35
+        ROUTE_WEIGHTS[secondary]=$((${ROUTE_WEIGHTS[secondary]} + add_weight))
     fi
 
     if [[ ${SERVICE_STATES[stubby]} != "HEALTHY" ]]; then
         ROUTE_WEIGHTS[secondary]=0
-        ROUTE_WEIGHTS[fallback]=$((${ROUTE_WEIGHTS[fallback]} + 25))
+        local add_weight=25
+        ROUTE_WEIGHTS[fallback]=$((${ROUTE_WEIGHTS[fallback]} + add_weight))
     fi
 
     update_resolved_config
@@ -361,8 +363,8 @@ start_service_with_deps() {
             if ! ping -c1 -W2 1.1.1.1 >/dev/null 2>&1; then
                 error "Network connectivity required for $service"
             fi
-        elif [[ ${SERVICE_STATES[$dep]:-"STOPPED"} != "HEALTHY" ]]; then
-            error "Cannot start $service: dependency $dep not healthy"
+        elif [[ ${SERVICE_STATES[$dep]:-"STOPPED"} == "FAILED" ]] && [[ $dep == "dnscrypt" ]]; then
+            warn "$service: dependency $dep failed, continuing with degraded setup"
         fi
     done
 
@@ -579,7 +581,7 @@ nameserver 8.8.8.8
 EOF
 
     if command -v pacman &> /dev/null; then
-        sudo pacman -S --noconfirm dnscrypt-proxy stubby gnu-netcat dnsutils
+        sudo pacman -S --noconfirm dnscrypt-proxy stubby gnu-netcat dnsutils logrotate
     elif command -v apt &> /dev/null; then
         sudo apt update
         sudo apt install -y dnscrypt-proxy stubby netcat-openbsd dnsutils
@@ -618,7 +620,7 @@ configure_dnscrypt_enterprise() {
 
 listen_addresses = ['127.0.0.1:5353']
 max_clients = 250
-user_name = 'dnscrypt'
+# user_name = 'dnscrypt'  # Commented out - user may not exist
 
 # Reliable Cloudflare servers
 server_names = ['cloudflare', 'cloudflare-ipv6']
@@ -652,7 +654,7 @@ timeout = 8000
 keepalive = 45
 netprobe_timeout = 30
 netprobe_address = '1.1.1.1:53'
-refuse_any = true
+# refuse_any = true  # Not supported in this version
 
 # Blocked names for security
 [blocked_names]
@@ -719,14 +721,14 @@ upstream_recursive_servers:
     tls_auth_name: "cloudflare-dns.com"
     tls_pubkey_pinset:
       - digest: "sha256"
-        value: yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU=
+        value: "yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU="
 
   # Cloudflare Secondary DoT
   - address_data: 1.0.0.1
     tls_auth_name: "cloudflare-dns.com"
     tls_pubkey_pinset:
       - digest: "sha256"
-        value: yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU=
+        value: "yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU="
 
   # Cloudflare IPv6 Primary
   - address_data: 2606:4700:4700::1111
@@ -1063,7 +1065,12 @@ establish_performance_baseline() {
         stubby_baseline=$((stubby_total / stubby_successes))
     fi
 
-    # Store baseline metrics
+    # Store baseline metrics - ensure indices exist
+    [[ -v SERVICE_METRICS[dnscrypt_baseline] ]] || SERVICE_METRICS[dnscrypt_baseline]=0
+    [[ -v SERVICE_METRICS[stubby_baseline] ]] || SERVICE_METRICS[stubby_baseline]=0
+    [[ -v SERVICE_METRICS[dnscrypt_success_rate] ]] || SERVICE_METRICS[dnscrypt_success_rate]=0
+    [[ -v SERVICE_METRICS[stubby_success_rate] ]] || SERVICE_METRICS[stubby_success_rate]=0
+    
     SERVICE_METRICS[dnscrypt_baseline]=$dnscrypt_baseline
     SERVICE_METRICS[stubby_baseline]=$stubby_baseline
     SERVICE_METRICS[dnscrypt_success_rate]=$((dnscrypt_successes * 100 / baseline_queries))
