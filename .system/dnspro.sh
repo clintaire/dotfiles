@@ -1,7 +1,7 @@
 #!/bin/bash
 # Enterprise Secure DNS Setup Script with Advanced Monitoring & Failover
-# Location: /home/cli/git/dotfiles/.system/secure-dns-setup.sh
-# Usage: ./secure-dns-setup.sh [install|restore|status|monitor]
+# Location: /home/cli/git/dotfiles/.system/dnspro.sh
+# Usage: ./dnspro.sh [install|restore|status|monitor]
 
 set -euo pipefail
 

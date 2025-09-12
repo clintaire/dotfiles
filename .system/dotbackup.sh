@@ -180,7 +180,7 @@ create_package_lists() {
 create_restore_script() {
     log "Creating restore script..."
     
-    cat > "$DOTFILES_DIR/scripts/restore_dotfiles.sh" << 'EOF'
+    cat > "$DOTFILES_DIR/scripts/dotrestore.sh" << 'EOF'
 #!/bin/bash
 
 # Dotfiles Restoration Script
@@ -303,8 +303,8 @@ main() {
 main "$@"
 EOF
 
-    chmod +x "$DOTFILES_DIR/scripts/restore_dotfiles.sh"
-    success "Restore script created at scripts/restore_dotfiles.sh"
+    chmod +x "$DOTFILES_DIR/scripts/dotrestore.sh"
+    success "Restore script created at scripts/dotrestore.sh"
 }
 
 # Main function
@@ -358,7 +358,7 @@ main() {
     fi
     
     success "Dotfiles backup completed successfully!"
-    log "To restore on a new system, run: ./scripts/restore_dotfiles.sh"
+    log "To restore on a new system, run: ./scripts/dotrestore.sh"
 }
 
 # Run main function

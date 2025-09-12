@@ -1,7 +1,7 @@
 #!/bin/bash
 # Secure DNS Setup Script with Cloudflare DoT/DoH and DNSCrypt
-# Location: /home/cli/git/dotfiles/.system/secure-dns-setup.sh
-# Usage: ./secure-dns-setup.sh [install|restore|status]
+# Location: /home/cli/git/dotfiles/.system/dnsbasic.sh
+# Usage: ./dnsbasic.sh [install|restore|status]
 
 set -euo pipefail
 
@@ -78,14 +78,14 @@ configure_dnscrypt() {
 
 listen_addresses = ['127.0.0.1:5353']
 max_clients = 250
-user_name = 'dnscrypt'
+# user_name = 'dnscrypt'  # Commented out - user may not exist
 
-# Use Cloudflare ODoH target (odoh.cloudflare-dns.com)
-server_names = ['cloudflare-odoh', 'cloudflare', 'cloudflare-security']
+# Use reliable Cloudflare servers
+server_names = ['cloudflare', 'cloudflare-security']
 
-# Enable DNS-over-HTTPS and ODoH
+# Enable DNS-over-HTTPS (ODoH may not be supported)
 doh_servers = true
-odoh_servers = true
+# odoh_servers = true  # Commented out - may not be supported
 require_dnssec = true
 require_nolog = true
 require_nofilter = true
@@ -107,13 +107,13 @@ block_ipv6 = false
 block_unqualified = true
 block_undelegated = true
 
-# ODoH Privacy Protection (proxy/target separation)
-anonymized_dns = {
-  routes = [
-    { server_name='cloudflare', via=['odoh-relay-*'] },
-    { server_name='cloudflare-security', via=['odoh-relay-*'] }
-  ]
-}
+# Anonymized DNS routing (simplified for compatibility)
+# anonymized_dns = {
+#   routes = [
+#     { server_name='cloudflare', via=['odoh-relay-*'] },
+#     { server_name='cloudflare-security', via=['odoh-relay-*'] }
+#   ]
+# }
 
 # Network settings for privacy
 force_tcp = false
@@ -121,7 +121,7 @@ timeout = 5000
 keepalive = 30
 netprobe_timeout = 60
 netprobe_address = '1.1.1.1:53'
-refuse_any = true
+# refuse_any = true  # Not supported in this version
 
 # Blocked names for security (minimal list)
 [blocked_names]
@@ -142,19 +142,20 @@ refuse_any = true
     refresh_delay = 72
     prefix = ''
     
-  [sources.'odoh-servers']
-    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-servers.md']
-    cache_file = '/var/cache/dnscrypt-proxy/odoh-servers.md'
-    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
-    refresh_delay = 72
-    prefix = ''
-    
-  [sources.'odoh-relays']
-    urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-relays.md']
-    cache_file = '/var/cache/dnscrypt-proxy/odoh-relays.md'
-    minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
-    refresh_delay = 72
-    prefix = ''
+  # ODoH sources commented out for compatibility
+  # [sources.'odoh-servers']
+  #   urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-servers.md']
+  #   cache_file = '/var/cache/dnscrypt-proxy/odoh-servers.md'
+  #   minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  #   refresh_delay = 72
+  #   prefix = ''
+  #   
+  # [sources.'odoh-relays']
+  #   urls = ['https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/odoh-relays.md']
+  #   cache_file = '/var/cache/dnscrypt-proxy/odoh-relays.md'
+  #   minisign_key = 'RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3'
+  #   refresh_delay = 72
+  #   prefix = ''
 EOF
 
     # Create blocked names file (basic security)
@@ -204,14 +205,14 @@ upstream_recursive_servers:
     tls_auth_name: "cloudflare-dns.com"
     tls_pubkey_pinset:
       - digest: "sha256"
-        value: yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU=
+        value: "yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU="
   
   # Cloudflare Secondary  
   - address_data: 1.0.0.1
     tls_auth_name: "cloudflare-dns.com"
     tls_pubkey_pinset:
       - digest: "sha256"
-        value: yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU=
+        value: "yioEpqeR4WtDwE9YxNVnCEkTxIjx6EEIeC/AwXSNoGU="
         
   # Cloudflare IPv6 Primary
   - address_data: 2606:4700:4700::1111

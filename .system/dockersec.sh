@@ -1,7 +1,7 @@
 #!/bin/bash
 # Secure Docker Setup Script
-# Location: /home/cli/git/dotfiles/.system/secure-docker-setup.sh
-# Usage: ./secure-docker-setup.sh [install|restore|status]
+# Location: /home/cli/git/dotfiles/.system/dockersec.sh
+# Usage: ./dockersec.sh [install|restore|status]
 
 set -euo pipefail
 

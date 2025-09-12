@@ -1,7 +1,7 @@
 #!/bin/bash
 # Emergency DNS/Network Revert Script
-# Location: /home/cli/git/dotfiles/.system/emergency-revert.sh
-# Usage: sudo ./emergency-revert.sh
+# Location: /home/cli/git/dotfiles/.system/emergency.sh
+# Usage: sudo ./emergency.sh
 
 set -euo pipefail
 

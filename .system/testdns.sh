@@ -1,6 +1,6 @@
 #!/bin/bash
 # Test DNS script in Docker container sandbox
-# Location: /home/cli/git/dotfiles/.system/test-dns-docker.sh
+# Location: /home/cli/git/dotfiles/.system/testdns.sh
 
 set -euo pipefail
 
@@ -43,9 +43,9 @@ RUN useradd -m -s /bin/bash testuser && \
     echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Copy DNS script
-COPY secure-dns-setup.sh /home/testuser/
-RUN chmod +x /home/testuser/secure-dns-setup.sh && \
-    chown testuser:testuser /home/testuser/secure-dns-setup.sh
+COPY dnsbasic.sh /home/testuser/
+RUN chmod +x /home/testuser/dnsbasic.sh && \
+    chown testuser:testuser /home/testuser/dnsbasic.sh
 
 # Enable systemd
 RUN systemctl enable systemd-resolved
@@ -64,7 +64,7 @@ build_test_container() {
     log "Building test container..."
     
     # Copy DNS script to temp location
-    cp "$SCRIPT_DIR/secure-dns-setup.sh" /tmp/
+    cp "$SCRIPT_DIR/dnsbasic.sh" /tmp/
     
     # Build container
     cd /tmp
@@ -96,17 +96,17 @@ test_dns_in_container() {
             
             # Test the DNS script
             echo '=== TESTING DNS SCRIPT ==='
-            sudo ./secure-dns-setup.sh status
+            sudo ./dnsbasic.sh status
             
             echo '=== INSTALLING SECURE DNS ==='
-            sudo ./secure-dns-setup.sh install || echo 'Install failed (expected in container)'
+            sudo ./dnsbasic.sh install || echo 'Install failed (expected in container)'
             
             echo '=== FINAL DNS CONFIG ==='
             cat /etc/resolv.conf || true
-            sudo ./secure-dns-setup.sh status
+            sudo ./dnsbasic.sh status
             
             echo '=== TESTING RESTORE ==='
-            sudo ./secure-dns-setup.sh restore || echo 'Restore completed'
+            sudo ./dnsbasic.sh restore || echo 'Restore completed'
             
             echo '=== POST-RESTORE CONFIG ==='
             cat /etc/resolv.conf || true
@@ -122,7 +122,7 @@ cleanup() {
     
     docker rm -f dns-test-container 2>/dev/null || true
     docker rmi dns-test:latest 2>/dev/null || true
-    rm -f /tmp/dns-test-Dockerfile /tmp/secure-dns-setup.sh
+    rm -f /tmp/dns-test-Dockerfile /tmp/dnsbasic.sh
     
     log "Cleanup completed"
 }

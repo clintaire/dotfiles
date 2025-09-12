@@ -208,9 +208,9 @@ setup_system() {
 
 # Verify no sensitive information is committed
 check_sensitive() {
-  if [ -x "$DOTFILES_DIR/sanitize.sh" ]; then
+  if [ -x "$DOTFILES_DIR/.system/dotscan.sh" ]; then
     log_info "Checking for sensitive information..."
-    "$DOTFILES_DIR/sanitize.sh"
+    "$DOTFILES_DIR/.system/dotscan.sh"
   fi
 }
 
