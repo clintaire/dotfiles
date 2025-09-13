@@ -195,7 +195,7 @@ bindsym $mod+r mode "resize"
 
 bar {
 	status_command i3blocks
-	font pango:JetBrainsMonoNL Nerd Font 10
+	font pango:JetBrainsMonoNL Nerd Font 14
 	position top
 }
 
@@ -225,7 +225,7 @@ gaps right 10px
 exec_always --no-startup-id feh --randomize --bg-fill /home/$USER/Pictures/Wallpaper/Shuffle/Water/*
 
 # Clean Thunar
-#:$ yay -S thunar poppler-utils gvfs thunar-archive-plugin 
+#:$ yay -S thunar poppler-utils gvfs thunar-archive-plugin
 #:$ yay -S tumbler poppler-glib libgsf ffmpegthumbnailer
 exec_always --no-startup-id tumblerd -b
 
@@ -237,7 +237,7 @@ exec_always --no-startup-id picom -b
 # exec_always --no-startup-id ~/.config/polybar/launch.sh -b
 
 # Enhanced keyring setup with proper error handling
-exec_always --no-startup-id ~/.config/i3/scripts/setup-keyring.sh -b
+# exec_always --no-startup-id ~/.config/i3/scripts/setup-keyring.sh -b
 
 # Launch polkit authentication agent for elevated privileges
 exec_always --no-startup-id /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 -b
@@ -284,5 +284,9 @@ for_window [class="Thunar" title="File Operation Progress"] move position center
 for_window [class="Brave-browser" title="Opening*"] floating enable
 for_window [class="Brave-browser" title="Opening*"] resize set 600 400
 for_window [class="Brave-browser" title="Opening*"] move position center
+
 # NVIDIA setup for hybrid graphics
-exec --no-startup-id ~/.config/i3/nvidia-setup.sh
+# exec --no-startup-id ~/.config/i3/nvidia-setup.sh
+
+# Hidpi display
+exec --no-startup-id xrdb -merge ~/.Xresources-i3

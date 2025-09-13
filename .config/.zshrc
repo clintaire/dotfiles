@@ -1,5 +1,8 @@
 # Enhanced .zshrc for Professional Development
 
+# GPG configuration
+export GPG_TTY=$(tty)
+
 # Performance optimization
 skip_global_compinit=1
 
