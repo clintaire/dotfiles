@@ -288,5 +288,5 @@ for_window [class="Brave-browser" title="Opening*"] move position center
 # NVIDIA setup for hybrid graphics
 # exec --no-startup-id ~/.config/i3/nvidia-setup.sh
 
-# Hidpi display
-exec --no-startup-id xrdb -merge ~/.Xresources-i3
+# Auto-detect DPI and load Xresources
+exec --no-startup-id ~/.config/i3/scripts/setup-dpi.sh

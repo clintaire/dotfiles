@@ -40,7 +40,9 @@ Xft.hinting:        true
 Xft.hintstyle:      hintslight
 Xft.lcdfilter:      lcddefault
 Xft.rgba:           rgb
-Xft.dpi:            150
+! Auto-detect DPI based on display
+! Use 150 for high-DPI, 96 for standard
+Xft.dpi:            96
 
 !! xcursor theme
 ! -----------------------------------------------------------------------------

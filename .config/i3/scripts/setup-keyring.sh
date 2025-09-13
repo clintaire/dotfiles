@@ -7,12 +7,25 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Keyring Setup: $1" >> ~/.config/i3/keyring.log
 }
 
-# Kill any existing keyring daemons to prevent conflicts
-killall gnome-keyring-daemon 2>/dev/null
-log_message "Stopped existing keyring daemons"
+# Check if keyring is already running and functional
+if [ -n "$SSH_AUTH_SOCK" ] && ssh-add -l >/dev/null 2>&1; then
+    log_message "Keyring already running and functional, skipping setup"
+    exit 0
+fi
 
-# Wait a moment for processes to terminate
-sleep 1
+# Only kill keyrings if we're in i3 session
+if [ "$XDG_CURRENT_DESKTOP" = "i3" ] || [ "$DESKTOP_SESSION" = "i3" ]; then
+    log_message "In i3 session, managing keyring"
+    # Kill any existing keyring daemons to prevent conflicts
+    killall gnome-keyring-daemon 2>/dev/null
+    log_message "Stopped existing keyring daemons"
+
+    # Wait a moment for processes to terminate
+    sleep 1
+else
+    log_message "Not in i3 session, keyring managed by system"
+    exit 0
+fi
 
 # Start GNOME keyring daemon with all security components
 if /usr/bin/gnome-keyring-daemon --start --components=secrets,ssh,pkcs11 --daemonize; then
