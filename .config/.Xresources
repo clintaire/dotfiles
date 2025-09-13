@@ -79,6 +79,10 @@ xterm*faceName:     JetBrainsMonoNL Nerd Font
 xterm*faceSize:     12
 xterm*pointerShape: left_ptr
 
+! window padding (similar to kitty)
+xterm*internalBorder: 6
+xterm*borderWidth: 2
+
 ! scrolling behavior
 xterm*savelines:       10000
 xterm*scrollKey:       true
@@ -95,11 +99,9 @@ xterm*cutNewLine:         false
 !xterm*charClass: 33:48,35:48,37-38:48,43:48,45-47:48,58:48,61:48,63-64:48,126:48
 
 ! custom keybindings
-!xterm*vt100.translations: #override \
-!  Ctrl Shift <Btn1Up>: exec-formatted("xdg-open '%t'", SELECT) select-end() \n\
-!  Ctrl Shift <Key>T:   spawn-new-terminal() \n\
-!  Ctrl Shift <Key>V:   insert-selection(CLIPBOARD) \n\
-!  Ctrl Shift <Key>C:   copy-selection(CLIPBOARD) \n\
-!  Ctrl <Key> minus:    smaller-vt-font() \n\
-!  Ctrl <Key> plus:     larger-vt-font() \n\
-!  Ctrl <Key> 0:        set-vt-font(d)
+xterm*vt100.translations: #override \
+  Ctrl Shift <Key>V:   insert-selection(CLIPBOARD) \n\
+  Ctrl Shift <Key>C:   copy-selection(CLIPBOARD) \n\
+  Ctrl <Key> minus:    smaller-vt-font() \n\
+  Ctrl <Key> plus:     larger-vt-font() \n\
+  Ctrl <Key> 0:        set-vt-font(d)
