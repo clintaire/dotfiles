@@ -112,8 +112,8 @@ xterm*fullscreen:   never
 xterm*buffered:     true
 
 ! font and cursor
-xterm*faceName:     monospace
-xterm*faceSize:     14
+xterm*faceName:     JetBrainsMonoNL Nerd Font
+xterm*faceSize:     12
 xterm*pointerShape: left_ptr
 
 ! scrolling behavior
