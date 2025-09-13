@@ -221,7 +221,7 @@ gaps bottom 10px
 gaps left 10px
 gaps right 10px
 
-exec_always --no-startup-id feh --randomize --bg-fill /home/$USER/Pictures/Wallpaper/Shuffle*
+exec_always --no-startup-id feh --randomize --bg-fill /home/$USER/Pictures/Wallpaper/Shuffle/Water/*
 
 # Clean Thunar
 #:$ yay -S thunar poppler-utils gvfs thunar-archive-plugin 
