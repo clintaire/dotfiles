@@ -39,6 +39,27 @@ export PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 
 # Quick navigation
 alias ..='cd ..' ...='cd ../..' ....='cd ../../..' ~='cd ~' -- -='cd -'
+alias qf='cd /home/cli/Documents/Portfolio/clintaire/projects/blogs/quickfix'
+alias cap='cd /home/cli/Documents/Portfolio/clintaire/projects'
+alias ca='cd /home/cli/Documents/Portfolio/clintaire/'
+alias dot='cd /home/cli/git/dotfiles'
+
+# NvChad aliases (Mousepad-style editor)
+alias nv='nvim'
+alias edit='nvim'
+alias e='nvim'
+
+# Quick execution and testing
+alias run='python'
+alias py='python'
+alias js='node'
+alias go='go run'
+alias rs='cargo run'
+alias test='npm test'
+alias serve='python -m http.server'
+alias pytest='python -m pytest'
+alias jupyter='jupyter notebook'
+alias lab='jupyter lab'
 
 # Enhanced ls
 alias ll='ls -alF' la='ls -A' l='ls -CF' ls='ls --color=auto' lt='ls -ltr' lh='ls -lh'
@@ -175,3 +196,21 @@ bindkey '^A' beginning-of-line '^E' end-of-line '^K' kill-line '^U' kill-whole-l
 alias dockermgr="~/automations/docker-manager.sh"
 alias dockerpro="~/automations/docker-project-manager.sh"
 export PATH=~/.npm-global/bin:$PATH
+export QT_STYLE_OVERRIDE=Adwaita-Dark
+export QT_QPA_PLATFORMTHEME=gtk3
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/cli/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/cli/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/cli/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/cli/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+

@@ -1,72 +1,35 @@
-!! gruvbox colors for all xlib applications
-!! https://github.com/potamides/dotfiles/blob/master/.Xresources
+!! ayu colors for all xlib applications
 !! xrdb -merge ~/.Xresources
 ! -----------------------------------------------------------------------------
 
-*background: #282828
-*foreground: #ebdbb2
+*background: #0e1419
+*foreground: #e5e1cf
+*cursorColor: #f19618
 
 ! black + darkGrey
-*color0:  #282828
-*color8:  #928374
+*color0:  #000000
+*color8:  #323232
 ! darkRed + red
-*color1:  #cc241d
-*color9:  #fb4934
+*color1:  #ff3333
+*color9:  #ff6565
 ! darkGreen + green
-*color2:  #98971a
-*color10: #b8bb26
+*color2:  #b8cc52
+*color10: #e9fe83
 ! darkYellow + yellow
-*color3:  #d79921
-*color11: #fabd2f
+*color3:  #e6c446
+*color11: #fff778
 ! darkBlue + blue
-*color4:  #458588
-*color12: #83a598
+*color4:  #36a3d9
+*color12: #68d4ff
 ! darkMagenta + magenta
-*color5:  #b16286
-*color13: #d3869b
+*color5:  #f07078
+*color13: #ffa3aa
 ! darkCyan + cyan
-*color6:  #689d6a
-*color14: #8ec07c
+*color6:  #95e5cb
+*color14: #c7fffc
 ! lightGrey + white
-*color7:  #a89984
-*color15: #ebdbb2
-! additional colors
-*color24:  #076678
-*color66:  #458588
-*color72:  #689d6a
-*color88:  #9d0006
-*color96:  #8f3f71
-*color100: #79740e
-*color106: #98971a
-*color108: #8ec07c
-*color109: #83a598
-*color124: #cc241d
-*color130: #af3a03
-*color132: #b16286
-*color136: #b57614
-*color142: #b8bb26
-*color166: #d65d0e
-*color167: #fb4934
-*color172: #d79921
-*color175: #d3869b
-*color208: #fe8019
-*color214: #fabd2f
-*color223: #ebdbb2
-*color228: #f2e5bc
-*color229: #fbf1c7
-*color230: #f9f5d7
-*color234: #1d2021
-*color235: #282828
-*color236: #32302f
-*color237: #3c3836
-*color239: #504945
-*color241: #665c54
-*color243: #7c6f64
-*color244: #928374
-*color245: #928374
-*color246: #a89984
-*color248: #bdae93
-*color250: #d5c4a1
+*color7:  #ffffff
+*color15: #ffffff
 
 !! xft fonts
 !-------------------------------------------------------------------------------
@@ -77,7 +40,7 @@ Xft.hinting:        true
 Xft.hintstyle:      hintslight
 Xft.lcdfilter:      lcddefault
 Xft.rgba:           rgb
-Xft.dpi:            150
+Xft.dpi:            96
 
 !! xcursor theme
 ! -----------------------------------------------------------------------------
@@ -112,8 +75,8 @@ xterm*fullscreen:   never
 xterm*buffered:     true
 
 ! font and cursor
-xterm*faceName:     monospace
-xterm*faceSize:     14
+xterm*faceName:     JetBrainsMonoNL Nerd Font
+xterm*faceSize:     12
 xterm*pointerShape: left_ptr
 
 ! scrolling behavior
