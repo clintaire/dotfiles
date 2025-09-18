@@ -187,5 +187,5 @@ If you encounter DNS/network issues:
 
 ## License
 
-[MIT](./LICENSE) &copy; [GitHub](https://github.com/clintaire)
+[MIT](./LICENSE) &copy; [Clint Airé](https://github.com/clintaire)
 
