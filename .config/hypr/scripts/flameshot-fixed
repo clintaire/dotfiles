@@ -1,6 +1,6 @@
 #!/bin/bash
 # Flameshot with proper scaling for Hyprland
-export QT_SCREEN_SCALE_FACTORS="0.5"
+export QT_SCREEN_SCALE_FACTORS="0.5;0.5"
 export QT_AUTO_SCREEN_SCALE_FACTOR=0
 export QT_SCALE_FACTOR=0.5
 export QT_WAYLAND_FORCE_DPI=96

@@ -100,7 +100,7 @@ If you prefer to install components individually:
 
 - **.config/**: User configuration files
   - **hypr/**: Hyprland window manager configuration
-  - **i3/**: i3 window manager configuration  
+  - **i3/**: i3 window manager configuration
   - **kitty/**: Terminal emulator configuration
   - **rofi/**: Application launcher configuration
   - **waybar/**: Status bar configuration
@@ -148,7 +148,7 @@ If you prefer to install components individually:
 - **`dnspro.sh`** - Enterprise DNS with monitoring & auto-recovery
   ```bash
   sudo ./dnspro.sh install    # Install enterprise DNS
-  ./dnspro.sh status          # Check status  
+  ./dnspro.sh status          # Check status
   ./dnspro.sh monitor         # Live monitoring
   ```
 
@@ -183,3 +183,9 @@ If you encounter DNS/network issues:
 1. Run emergency recovery: `sudo ./.system/emergency.sh`
 2. Check DNS status: `./.system/dnspro.sh status`
 3. Test in container: `./.system/testdns.sh test`
+
+
+## License
+
+[MIT](./LICENSE) &copy; [GitHub](https://github.com/clintaire)
+

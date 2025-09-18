@@ -233,8 +233,8 @@ filechooser treeview:selected {
 }
 
 /* Firefox-specific GTK dialogs */
-window[class*="firefox"],
-window[class*="Firefox"] {
+window.firefox,
+window.Firefox {
     background-color: #0e1419;
     color: #e5e1cf;
 }
@@ -261,4 +261,283 @@ menuitem {
 menuitem:hover {
     background-color: #243340;
     color: #f19618;
+}
+
+/* PulseAudio Volume Control (pavucontrol) styling */
+* {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
+}
+
+window.pavucontrol,
+.pavucontrol,
+window#PulseAudioVolumeControl,
+#PulseAudioVolumeControl {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
+}
+
+/* Header bars for pavucontrol */
+.pavucontrol headerbar,
+window.pavucontrol headerbar {
+    background: linear-gradient(to bottom, #1f2430, #0f1419);
+    color: #bfbdb6;
+    border-bottom: 1px solid #1e2328;
+}
+
+/* Notebook tabs for different pavucontrol sections */
+.pavucontrol notebook tab,
+window.pavucontrol notebook tab {
+    background-color: #1f2430;
+    color: #707a8c;
+    border: 1px solid #1e2328;
+    padding: 8px 16px;
+}
+
+.pavucontrol notebook tab:checked,
+window.pavucontrol notebook tab:checked {
+    background-color: #0f1419;
+    color: #ffcc66;
+    border-bottom: 2px solid #ffcc66;
+}
+
+/* Volume sliders */
+.pavucontrol scale trough,
+window.pavucontrol scale trough {
+    background-color: #1e2328;
+    border: 1px solid #1e2328;
+    border-radius: 3px;
+}
+
+.pavucontrol scale highlight,
+window.pavucontrol scale highlight {
+    background-color: #ffcc66;
+    border-radius: 3px;
+}
+
+.pavucontrol scale slider,
+window.pavucontrol scale slider {
+    background-color: #ffcc66;
+    border: 2px solid #0f1419;
+    border-radius: 50%;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.pavucontrol scale slider:hover,
+window.pavucontrol scale slider:hover {
+    background-color: #ffd173;
+}
+
+/* Volume meters/progress bars */
+.pavucontrol progressbar trough,
+window.pavucontrol progressbar trough {
+    background-color: #1e2328;
+    border-radius: 3px;
+}
+
+.pavucontrol progressbar progress,
+window.pavucontrol progressbar progress {
+    background-color: #95e6cb;
+    border-radius: 3px;
+}
+
+/* Device lists */
+.pavucontrol treeview,
+window.pavucontrol treeview {
+    background-color: #0f1419;
+    color: #bfbdb6;
+}
+
+.pavucontrol treeview:selected,
+window.pavucontrol treeview:selected {
+    background-color: #ffcc66;
+    color: #0f1419;
+}
+
+/* Buttons in pavucontrol */
+.pavucontrol button,
+window.pavucontrol button {
+    background: linear-gradient(to bottom, #1f2430, #171b24);
+    color: #bfbdb6;
+    border: 1px solid #1e2328;
+    border-radius: 3px;
+}
+
+.pavucontrol button:hover,
+window.pavucontrol button:hover {
+    background: linear-gradient(to bottom, #2d3748, #1f2430);
+    color: #ffcc66;
+}
+
+.pavucontrol button:active,
+window.pavucontrol button:active {
+    background-color: #0f1419;
+    color: #ffcc66;
+}
+
+/* ComboBoxes for device selection */
+.pavucontrol combobox button,
+window.pavucontrol combobox button {
+    background-color: #1f2430;
+    color: #bfbdb6;
+    border: 1px solid #1e2328;
+}
+
+.pavucontrol combobox button:hover,
+window.pavucontrol combobox button:hover {
+    background-color: #2d3748;
+    color: #ffcc66;
+}
+
+/* Labels */
+.pavucontrol label,
+window.pavucontrol label {
+    color: #bfbdb6;
+}
+
+/* Frame borders for grouping */
+.pavucontrol frame,
+window.pavucontrol frame {
+    border: 1px solid #1e2328;
+}
+
+.pavucontrol frame > label,
+window.pavucontrol frame > label {
+    color: #ffcc66;
+    font-weight: bold;
+}
+
+/* Scrollbars */
+.pavucontrol scrollbar,
+window.pavucontrol scrollbar {
+    background-color: #1f2430;
+}
+
+.pavucontrol scrollbar slider,
+window.pavucontrol scrollbar slider {
+    background-color: #707a8c;
+    border-radius: 3px;
+}
+
+.pavucontrol scrollbar slider:hover,
+window.pavucontrol scrollbar slider:hover {
+    background-color: #8a9199;
+}
+
+/* Blueman Bluetooth Manager styling */
+window.blueman-manager,
+.blueman-manager {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
+}
+
+.blueman-manager headerbar {
+    background: linear-gradient(to bottom, #1f2430, #0f1419);
+    color: #bfbdb6;
+    border-bottom: 1px solid #1e2328;
+}
+
+.blueman-manager treeview {
+    background-color: #0f1419;
+    color: #bfbdb6;
+}
+
+.blueman-manager treeview:selected {
+    background-color: #ffcc66;
+    color: #0f1419;
+}
+
+.blueman-manager button {
+    background: linear-gradient(to bottom, #1f2430, #171b24);
+    color: #bfbdb6;
+    border: 1px solid #1e2328;
+    border-radius: 3px;
+}
+
+.blueman-manager button:hover {
+    background: linear-gradient(to bottom, #2d3748, #1f2430);
+    color: #ffcc66;
+}
+
+.blueman-manager toolbar {
+    background-color: #0f1419;
+    border-bottom: 1px solid #1e2328;
+}
+
+.blueman-manager menubar {
+    background-color: #0f1419;
+    color: #bfbdb6;
+}
+
+.blueman-manager menubar > menuitem:hover {
+    background-color: #1f2430;
+    color: #ffcc66;
+}
+
+/* Generic Bluetooth settings applications */
+window[title*="Bluetooth"],
+window[title*="bluetooth"] {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
+}
+
+/* LXAppearance dark theme styling */
+window.lxappearance,
+.lxappearance {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
+}
+
+.lxappearance notebook {
+    background-color: #0f1419;
+    color: #bfbdb6;
+}
+
+.lxappearance notebook tab {
+    background-color: #1f2430;
+    color: #707a8c;
+    border: 1px solid #1e2328;
+}
+
+.lxappearance notebook tab:checked {
+    background-color: #0f1419;
+    color: #ffcc66;
+}
+
+.lxappearance treeview {
+    background-color: #0f1419;
+    color: #bfbdb6;
+}
+
+.lxappearance treeview:selected {
+    background-color: #ffcc66;
+    color: #0f1419;
+}
+
+.lxappearance button {
+    background-color: #1f2430;
+    color: #bfbdb6;
+    border: 1px solid #1e2328;
+}
+
+.lxappearance button:hover {
+    background-color: #2d3748;
+    color: #ffcc66;
+}
+
+.lxappearance frame {
+    border: 1px solid #1e2328;
+}
+
+.lxappearance label {
+    color: #bfbdb6;
+}
+
+/* Generic settings windows */
+window[title*="Settings"],
+window[title*="Preferences"],
+window[title*="Configuration"] {
+    background-color: #0f1419 !important;
+    color: #bfbdb6 !important;
 }

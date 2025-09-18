@@ -5,16 +5,10 @@ x-scheme-handler/https=brave-browser.desktop
 x-scheme-handler/about=brave-browser.desktop
 x-scheme-handler/unknown=brave-browser.desktop
 application/pdf=org.pwmt.zathura.desktop
-x-scheme-handler/jetbrains=jetbrains-toolbox.desktop
-x-scheme-handler/tonsite=org.telegram.desktop.desktop
 
 [Added Associations]
 application/pdf=org.pwmt.zathura.desktop;
-text/html=firefox.desktop;nvim.desktop;
+text/html=nvim.desktop;
 text/javascript=vim.desktop;
 text/plain=org.xfce.mousepad.desktop;vim.desktop;
 text/markdown=org.xfce.mousepad.desktop;nvim.desktop;
-image/jpeg=imv.desktop;
-x-scheme-handler/tonsite=org.telegram.desktop.desktop;
-image/png=imv.desktop;
-application/x-ipynb+json=emacs.desktop;nvim.desktop;

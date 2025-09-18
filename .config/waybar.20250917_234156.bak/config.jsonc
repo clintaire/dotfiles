@@ -42,8 +42,6 @@
         "interval": 1,
         "rotate": 0,
         "tooltip-format": "<tt>{calendar}</tt>",
-        "on-click": "timedatectl status | rofi -dmenu -theme ~/.config/rofi/launchers/type-4/style-1.rasi -p 'Time Status' -width 80 -lines 10 -font 'JetBrainsMono Nerd Font 10'",
-        "on-click-right": "~/.config/waybar/datetime-menu.sh",
         "calendar": {
             "mode": "month",
             "mode-mon-col": 3,
