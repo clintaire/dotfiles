@@ -63,6 +63,7 @@ alias serve='python -m http.server'
 alias pytest='python -m pytest'
 alias jupyter='jupyter notebook'
 alias lab='jupyter lab'
+alias cl='clear'
 
 # Enhanced ls
 alias ll='ls -alF' la='ls -A' l='ls -CF' ls='ls --color=auto' lt='ls -ltr' lh='ls -lh'
@@ -98,13 +99,13 @@ alias grep='grep --color=auto' egrep='egrep --color=auto' fgrep='fgrep --color=a
 
 # Docker (conditional)
 if command -v docker &> /dev/null; then
-    alias d='docker' dc='docker-compose' dps='docker ps' dpa='docker ps -a'
+    alias dk='docker' dc='docker-compose' dps='docker ps' dpa='docker ps -a'
     alias di='docker images' drm='docker rm' drmi='docker rmi' dstop='docker stop $(docker ps -q)'
 fi
 
 # Kubernetes (conditional)
 if command -v kubectl &> /dev/null; then
-    alias k='kubectl' kg='kubectl get' kd='kubectl describe' ka='kubectl apply' kdel='kubectl delete'
+    alias kub='kubectl' kg='kubectl get' kd='kubectl describe' ka='kubectl apply' kubd='kubectl delete'
 fi
 
 # Functions
@@ -199,8 +200,8 @@ bindkey '^A' beginning-of-line '^E' end-of-line '^K' kill-line '^U' kill-whole-l
 alias dockermgr="~/automations/docker-manager.sh"
 alias dockerpro="~/automations/docker-project-manager.sh"
 export PATH=~/.npm-global/bin:$PATH
-export QT_STYLE_OVERRIDE=Adwaita-Dark
-export QT_QPA_PLATFORMTHEME=gtk3
+# export QT_STYLE_OVERRIDE=Adwaita-Dark
+export QT_QPA_PLATFORMTHEME=qt5ct
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -217,3 +218,9 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+export PATH="$HOME/.local/bin:$PATH"
+
+# export _JAVA_OPTIONS="-Dswt.autoScale=200"
+# export GDK_SCALE=2
+# export _JAVA_OPTIONS="-Dawt.toolkit.name=WLToolkit"
+export PATH="$HOME/.config/emacs/bin:$PATH"

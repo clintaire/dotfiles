@@ -1,2 +1,1 @@
-xrdb -merge ~/.Xresources-i3
-exec i3
+exec Hyprland
