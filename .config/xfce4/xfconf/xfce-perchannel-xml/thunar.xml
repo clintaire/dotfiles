@@ -7,9 +7,9 @@
   <property name="last-window-height" type="int" value="1623"/>
   <property name="last-window-maximized" type="bool" value="true"/>
   <property name="last-separator-position" type="int" value="214"/>
-  <property name="last-show-hidden" type="bool" value="true"/>
-  <property name="last-details-view-zoom-level" type="string" value="THUNAR_ZOOM_LEVEL_38_PERCENT"/>
-  <property name="last-details-view-column-widths" type="string" value="50,133,199,50,178,1759,50,73,888,50,50,213,50,257"/>
+  <property name="last-show-hidden" type="bool" value="false"/>
+  <property name="last-details-view-zoom-level" type="string" value="THUNAR_ZOOM_LEVEL_50_PERCENT"/>
+  <property name="last-details-view-column-widths" type="string" value="50,133,199,50,178,1759,50,73,553,50,50,213,50,257"/>
   <property name="last-details-view-column-order" type="string" value="THUNAR_COLUMN_NAME,THUNAR_COLUMN_SIZE,THUNAR_COLUMN_TYPE,THUNAR_COLUMN_DATE_MODIFIED"/>
   <property name="last-details-view-fixed-columns" type="bool" value="true"/>
   <property name="last-menubar-visible" type="bool" value="true"/>
