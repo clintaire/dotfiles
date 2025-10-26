@@ -54,7 +54,7 @@ declare -A SERVICE_METRICS=(
 
 # DNS routing configuration
 declare -A DNS_ROUTES=(
-    [primary]="127.0.0.1:5353"
+    [primary]="127.0.0.1:5335"
     [secondary]="127.0.0.1:5453"
     [fallback]="1.1.1.1:53"
 )
@@ -74,8 +74,8 @@ declare -A SERVICE_DEPS=(
 
 # Health check definitions
 declare -A HEALTH_CHECKS=(
-    [dnscrypt_port]="nc -z 127.0.0.1 5353"
-    [dnscrypt_resolve]="dig @127.0.0.1 -p 5353 +timeout=2 +tries=1 google.com"
+    [dnscrypt_port]="nc -z 127.0.0.1 5335"
+    [dnscrypt_resolve]="dig @127.0.0.1 -p 5335 +timeout=2 +tries=1 google.com"
     [stubby_port]="nc -z 127.0.0.1 5453"
     [stubby_resolve]="dig @127.0.0.1 -p 5453 +timeout=2 +tries=1 google.com"
     [system_resolve]="nslookup google.com"
@@ -313,7 +313,7 @@ update_resolved_config() {
     local dns_servers=""
 
     if [[ ${ROUTE_WEIGHTS[primary]} -gt 0 ]]; then
-        dns_servers+="127.0.0.1:5353 "
+        dns_servers+="127.0.0.1:5335 "
     fi
     if [[ ${ROUTE_WEIGHTS[secondary]} -gt 0 ]]; then
         dns_servers+="127.0.0.1:5453 "
@@ -377,7 +377,7 @@ start_service_with_deps() {
             sudo systemctl start dnscrypt-proxy
             wait_for_service "dnscrypt-proxy"
             sleep 3
-            if measure_dns_performance "127.0.0.1" "5353"; then
+            if measure_dns_performance "127.0.0.1" "5335"; then
                 transition_state "$service" "HEALTHY"
             else
                 transition_state "$service" "FAILED"
@@ -468,7 +468,7 @@ attempt_service_recovery() {
         "dnscrypt")
             sudo systemctl restart dnscrypt-proxy
             sleep 5
-            if measure_dns_performance "127.0.0.1" "5353"; then
+            if measure_dns_performance "127.0.0.1" "5335"; then
                 log "DNSCrypt recovery successful"
                 return 0
             fi
@@ -539,7 +539,7 @@ stop_existing_services() {
     sudo systemctl stop dnscrypt-proxy || true
     sudo systemctl stop stubby || true
 
-    sudo fuser -k 5353/tcp 5353/udp 2>/dev/null || true
+    sudo fuser -k 5335/tcp 5335/udp 2>/dev/null || true
     sudo fuser -k 5453/tcp 5453/udp 2>/dev/null || true
 
     sleep 3
@@ -581,12 +581,12 @@ nameserver 8.8.8.8
 EOF
 
     if command -v pacman &> /dev/null; then
-        sudo pacman -S --noconfirm dnscrypt-proxy stubby gnu-netcat dnsutils logrotate
+        sudo pacman -S --noconfirm dnscrypt-proxy stubby dnsutils logrotate
     elif command -v apt &> /dev/null; then
         sudo apt update
-        sudo apt install -y dnscrypt-proxy stubby netcat-openbsd dnsutils
+        sudo apt install -y dnscrypt-proxy stubby dnsutils
     elif command -v dnf &> /dev/null; then
-        sudo dnf install -y dnscrypt-proxy stubby nmap-ncat bind-utils
+        sudo dnf install -y dnscrypt-proxy stubby bind-utils
     else
         error "Package manager not supported. Please install dnscrypt-proxy and stubby manually."
     fi
@@ -618,7 +618,7 @@ configure_dnscrypt_enterprise() {
 # Enterprise DNSCrypt-proxy configuration
 # Optimized for reliability and performance
 
-listen_addresses = ['127.0.0.1:5353']
+listen_addresses = ['127.0.0.1:5335']
 max_clients = 250
 # user_name = 'dnscrypt'  # Commented out - user may not exist
 
@@ -836,7 +836,7 @@ test_encrypted_dns_functionality() {
     local total_tests=2
 
     # Test DNSCrypt
-    if measure_dns_performance "127.0.0.1" "5353"; then
+    if measure_dns_performance "127.0.0.1" "5335"; then
         ((tests_passed++))
         log "DNSCrypt functionality: PASS"
     else
@@ -907,7 +907,7 @@ test_performance_benchmarks() {
     # Test DNSCrypt performance (5 queries)
     for i in {1..5}; do
         local start_time=$(date +%s%3N)
-        if dig @127.0.0.1 -p 5353 +timeout=3 google.com >/dev/null 2>&1; then
+        if dig @127.0.0.1 -p 5335 +timeout=3 google.com >/dev/null 2>&1; then
             local end_time=$(date +%s%3N)
             dnscrypt_times+=($((end_time - start_time)))
         fi
@@ -1034,7 +1034,7 @@ establish_performance_baseline() {
     # Baseline DNSCrypt performance
     for i in $(seq 1 $baseline_queries); do
         local start_time=$(date +%s%3N)
-        if dig @127.0.0.1 -p 5353 +timeout=5 "test$i.google.com" >/dev/null 2>&1; then
+        if dig @127.0.0.1 -p 5335 +timeout=5 "test$i.google.com" >/dev/null 2>&1; then
             local end_time=$(date +%s%3N)
             dnscrypt_total=$((dnscrypt_total + end_time - start_time))
             ((dnscrypt_successes++))
@@ -1120,7 +1120,7 @@ generate_installation_report() {
 
     info ""
     info "DNS Configuration:"
-    info "  Primary Encrypted DNS: DNSCrypt-proxy (127.0.0.1:5353)"
+    info "  Primary Encrypted DNS: DNSCrypt-proxy (127.0.0.1:5335)"
     info "  Secondary Encrypted DNS: Stubby DoT (127.0.0.1:5453)"
     info "  Fallback DNS: Cloudflare (1.1.1.1), Quad9 (9.9.9.9)"
     info "  DNSSEC: Enabled"
@@ -1260,7 +1260,7 @@ show_status() {
     # Port status
     info ""
     info "Port Status:"
-    echo "  Port 5353 (DNSCrypt): $(nc -z 127.0.0.1 5353 2>/dev/null && echo "OPEN" || echo "CLOSED")"
+    echo "  Port 5335 (DNSCrypt): $(nc -z 127.0.0.1 5335 2>/dev/null && echo "OPEN" || echo "CLOSED")"
     echo "  Port 5453 (Stubby): $(nc -z 127.0.0.1 5453 2>/dev/null && echo "OPEN" || echo "CLOSED")"
 
     # DNS Resolution Tests
@@ -1269,8 +1269,8 @@ show_status() {
     echo -n "  System DNS: "
     nslookup google.com >/dev/null 2>&1 && echo "OK" || echo "FAILED"
 
-    echo -n "  DNSCrypt (port 5353): "
-    dig @127.0.0.1 -p 5353 +timeout=3 google.com >/dev/null 2>&1 && echo "OK" || echo "FAILED"
+    echo -n "  DNSCrypt (port 5335): "
+    dig @127.0.0.1 -p 5335 +timeout=3 google.com >/dev/null 2>&1 && echo "OK" || echo "FAILED"
 
     echo -n "  Stubby DoT (port 5453): "
     dig @127.0.0.1 -p 5453 +timeout=3 google.com >/dev/null 2>&1 && echo "OK" || echo "FAILED"
@@ -1361,7 +1361,7 @@ show_monitor() {
 
         # Test DNSCrypt
         local start_time=$(date +%s%3N)
-        if dig @127.0.0.1 -p 5353 +timeout=2 google.com >/dev/null 2>&1; then
+        if dig @127.0.0.1 -p 5335 +timeout=2 google.com >/dev/null 2>&1; then
             local end_time=$(date +%s%3N)
             echo "  DNSCrypt: $((end_time - start_time))ms"
         else
