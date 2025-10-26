@@ -4,6 +4,9 @@
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+# Performance optimization
+skip_global_compinit=1
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -152,10 +155,100 @@ open() {
   xdg-open "$@" >/dev/null 2>&1 &
 }
 
+# Quick navigation
+# alias mdd='cd /home/$USER/Documents/'
+# alias dvv='cd /home/$USER/Documents/'
+# alias txx='cd /home/$USER/Documents/'
+alias dtt='cd /home/$USER/Work/dotfiles/'
+
 # Directories
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+
+# File search and grep
+alias ff='find . -type f -name' fd='find . -type d -name'
+alias grep='grep --color=auto' egrep='egrep --color=auto' fgrep='fgrep --color=auto'
+
+# Functions
+mkcd() { mkdir -p "$1" && cd "$1"; }
+
+extract() {
+    if [ -f $1 ] ; then
+        case $1 in
+            *.tar.bz2)   tar xjf $1     ;;
+            *.tar.gz)    tar xzf $1     ;;
+            *.bz2)       bunzip2 $1     ;;
+            *.rar)       unrar e $1     ;;
+            *.gz)        gunzip $1      ;;
+            *.tar)       tar xf $1      ;;
+            *.tbz2)      tar xjf $1     ;;
+            *.tgz)       tar xzf $1     ;;
+            *.zip)       unzip $1       ;;
+            *.Z)         uncompress $1  ;;
+            *.7z)        7z x $1        ;;
+            *)     echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+gitignore() { curl -sL "https://www.gitignore.io/api/$1"; }
+killp() { ps aux | grep "$1" | grep -v grep | awk '{print $2}' | xargs kill -9; }
+
+# Web search functions
+unalias ddg google 2>/dev/null
+
+duckduckgo() {
+    [[ $# -eq 0 ]] && { echo "Usage: duckduckgo <search terms>"; return 1; }
+    xdg-open "https://duckduckgo.com/?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+googlesearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: googlesearch <search terms>"; return 1; }
+    xdg-open "https://www.google.com/search?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+ghsearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: ghsearch <search terms>"; return 1; }
+    xdg-open "https://github.com/search?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+sosearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: sosearch <search terms>"; return 1; }
+    xdg-open "https://stackoverflow.com/search?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+mdnsearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: mdnsearch <search terms>"; return 1; }
+    xdg-open "https://developer.mozilla.org/en-US/search?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+npmsearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: npmsearch <package name>"; return 1; }
+    xdg-open "https://www.npmjs.com/search?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+pypisearch() {
+    [[ $# -eq 0 ]] && { echo "Usage: pypisearch <package name>"; return 1; }
+    xdg-open "https://pypi.org/search/?q=$(echo "$*" | sed 's/ /+/g')" 2>/dev/null &
+}
+
+# Search aliases
+alias ddg='duckduckgo' google='googlesearch' websearch='duckduckgo' search='duckduckgo'
+
+alias gh='ghsearch' so='sosearch' mdn='mdnsearch' npm='npmsearch' pypi='pypisearch'
+
+# Lazy load nvm
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+    export NVM_DIR="$HOME/.nvm"
+    nvm() { unset -f nvm; [[ -s "$NVM_DIR/nvm.sh" ]] && \. "$NVM_DIR/nvm.sh"; nvm "$@"; }
+fi
+
+# Auto-suggestions configuration
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#666666"
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Tools
 alias d='docker'
@@ -190,6 +283,7 @@ if command -v fzf &> /dev/null; then
   fi
 fi
 
+export PATH=~/.npm-global/bin:$PATH
 export PATH=/usr/local/texlive/2025/bin/x86_64-linux:$PATH
 
 export GPG_TTY=$(tty)
