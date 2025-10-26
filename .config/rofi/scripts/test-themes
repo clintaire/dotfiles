@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# Test rofi with all Omarchy themes in debug mode
+
+THEMES_DIR="$HOME/.local/share/omarchy/themes"
+CURRENT_THEME_LINK="$HOME/.config/omarchy/current/theme"
+
+echo "======================================"
+echo "Rofi Theme Cycling Test (Debug Mode)"
+echo "======================================"
+echo ""
+
+# Get all themes
+THEMES=($(ls "$THEMES_DIR" | sort))
+
+echo "Found ${#THEMES[@]} themes:"
+for theme in "${THEMES[@]}"; do
+    echo "  - $theme"
+done
+echo ""
+
+# Test each theme
+for theme in "${THEMES[@]}"; do
+    echo "--------------------------------------"
+    echo "Testing theme: $theme"
+    echo "--------------------------------------"
+
+    # Switch to this theme
+    ln -nsf "$THEMES_DIR/$theme" "$CURRENT_THEME_LINK"
+
+    # Verify rofi.rasi exists
+    if [ -f "$THEMES_DIR/$theme/rofi.rasi" ]; then
+        echo "✓ rofi.rasi found"
+
+        # Show first few color definitions
+        echo ""
+        echo "Theme colors:"
+        grep -E "^\s*(bg0|fg|green):" "$THEMES_DIR/$theme/rofi.rasi" | head -3
+
+        # Test rofi config loading
+        echo ""
+        echo "Testing rofi config..."
+        DISPLAY=:0 rofi -dump-config 2>&1 | grep -i "font\|theme" | head -5
+
+        # Launch rofi briefly to test rendering
+        echo ""
+        echo "Launching rofi (will auto-close in 2 seconds)..."
+        DISPLAY=:0 timeout 2 rofi -show drun -debug 2>&1 | grep -E "Loading|theme|font|color" | head -10
+
+    else
+        echo "✗ rofi.rasi NOT found!"
+    fi
+
+    echo ""
+    sleep 1
+done
+
+echo "======================================"
+echo "Test complete!"
+echo "======================================"
+echo ""
+echo "Current theme: $(basename $(readlink $CURRENT_THEME_LINK))"

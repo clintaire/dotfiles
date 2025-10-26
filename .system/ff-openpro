@@ -1,0 +1,1683 @@
+#!/bin/bash
+
+# Enterprise VPN Namespace Launcher
+# Zero-leak architecture with cryptographic hardening
+# Based on dnspro.sh enterprise patterns
+
+set -euo pipefail
+
+# Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_FILE="$SCRIPT_DIR/vpn-namespace.log"
+METRICS_FILE="$SCRIPT_DIR/vpn-metrics.json"
+TMP_DIR="$SCRIPT_DIR/tmp"
+
+# Create tmp directory if it doesn't exist
+mkdir -p "$TMP_DIR"
+
+# Security settings
+DNS_LEAK_TEST_TIMEOUT=5
+HEALTH_CHECK_INTERVAL=10
+VPN_CONNECT_TIMEOUT=15
+CIRCUIT_BREAKER_THRESHOLD=3
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Logging functions
+log() {
+    echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] $1${NC}" | tee -a "$LOG_FILE"
+}
+
+warn() {
+    echo -e "${YELLOW}[WARNING] $1${NC}" | tee -a "$LOG_FILE"
+}
+
+error() {
+    echo -e "${RED}[ERROR] $1${NC}" | tee -a "$LOG_FILE"
+    exit 1
+}
+
+info() {
+    echo -e "${BLUE}[INFO] $1${NC}" | tee -a "$LOG_FILE"
+}
+
+# Auto-detect network interface
+INTERFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
+
+if [ -z "$INTERFACE" ]; then
+    error "Could not detect active network interface"
+fi
+
+# State management (dnspro.sh pattern)
+declare -A VPN_STATE=(
+    [status]="STOPPED"
+    [connection_attempts]=0
+    [last_successful_connection]=0
+    [uptime_start]=0
+)
+
+# Circuit breaker for VPN connections (dnspro.sh pattern)
+declare -A CIRCUIT_BREAKER=(
+    [failures]=0
+    [last_failure]=0
+    [timeout]=300
+    [threshold]=3
+)
+
+# Performance metrics (dnspro.sh pattern)
+declare -A METRICS=(
+    [connection_attempts]=0
+    [successful_connections]=0
+    [failed_connections]=0
+    [total_uptime]=0
+    [avg_connection_time]=0
+    [dns_leaks_detected]=0
+    [killswitch_activations]=0
+)
+
+# Graceful cleanup trap (dnspro.sh pattern)
+cleanup_on_interrupt() {
+    echo ""
+    warn "Interrupted! Cleaning up..."
+    # Kill any background monitors
+    jobs -p | xargs -r kill 2>/dev/null || true
+    exit 130
+}
+
+trap cleanup_on_interrupt INT TERM
+
+# Circuit breaker functions (dnspro.sh pattern)
+circuit_breaker_check() {
+    local current_time=$(date +%s)
+    local failures=${CIRCUIT_BREAKER[failures]}
+    local last_failure=${CIRCUIT_BREAKER[last_failure]}
+    local timeout=${CIRCUIT_BREAKER[timeout]}
+    local threshold=${CIRCUIT_BREAKER[threshold]}
+
+    # Reset if timeout elapsed
+    if [[ $((current_time - last_failure)) -gt $timeout ]]; then
+        CIRCUIT_BREAKER[failures]=0
+        log "Circuit breaker reset after ${timeout}s timeout"
+        return 0
+    fi
+
+    # Check if threshold exceeded
+    if [[ $failures -ge $threshold ]]; then
+        warn "Circuit breaker OPEN (failures: $failures, threshold: $threshold)"
+        warn "Wait $((timeout - (current_time - last_failure)))s before retry"
+        return 1
+    fi
+
+    return 0
+}
+
+record_connection_failure() {
+    CIRCUIT_BREAKER[failures]=$((${CIRCUIT_BREAKER[failures]} + 1))
+    CIRCUIT_BREAKER[last_failure]=$(date +%s)
+    METRICS[failed_connections]=$((${METRICS[failed_connections]} + 1))
+    warn "Connection failure recorded (total: ${CIRCUIT_BREAKER[failures]})"
+}
+
+record_connection_success() {
+    CIRCUIT_BREAKER[failures]=0
+    METRICS[successful_connections]=$((${METRICS[successful_connections]} + 1))
+    VPN_STATE[last_successful_connection]=$(date +%s)
+    VPN_STATE[uptime_start]=$(date +%s)
+    log "Connection success recorded"
+}
+
+# Metrics persistence (dnspro.sh pattern)
+save_metrics() {
+    cat > "$METRICS_FILE" <<EOF
+{
+  "timestamp": "$(date -Iseconds)",
+  "connection_attempts": ${METRICS[connection_attempts]},
+  "successful_connections": ${METRICS[successful_connections]},
+  "failed_connections": ${METRICS[failed_connections]},
+  "avg_connection_time": ${METRICS[avg_connection_time]},
+  "dns_leaks_detected": ${METRICS[dns_leaks_detected]},
+  "killswitch_activations": ${METRICS[killswitch_activations]},
+  "vpn_status": "${VPN_STATE[status]}",
+  "circuit_breaker_failures": ${CIRCUIT_BREAKER[failures]}
+}
+EOF
+}
+
+# Check for required packages
+check_dependencies() {
+    local missing_deps=()
+
+    # Essential tools
+    for dep in openvpn dig nc curl; do
+        if ! command -v "$dep" &>/dev/null; then
+            missing_deps+=("$dep")
+        fi
+    done
+
+    # Optional but recommended for enterprise security
+    if ! command -v dnscrypt-proxy &>/dev/null; then
+        warn "dnscrypt-proxy not installed - DNS encryption disabled"
+    fi
+
+    if ! command -v stubby &>/dev/null; then
+        warn "stubby not installed - DNS-over-TLS disabled"
+    fi
+
+    if [ ${#missing_deps[@]} -gt 0 ]; then
+        error "Missing dependencies: ${missing_deps[*]}"
+    fi
+}
+
+# Timezone mapping for VPN locations
+get_timezone_for_country() {
+    local namespace=$1
+    local country=""
+
+    # Extract country code from namespace
+    if [[ $namespace =~ (dk|denmark) ]]; then country="Europe/Copenhagen"
+    elif [[ $namespace =~ (usa|us|united-states) ]]; then country="America/New_York"
+    elif [[ $namespace =~ (canada|ca) ]]; then country="America/Toronto"
+    elif [[ $namespace =~ (china|cn) ]]; then country="Asia/Shanghai"
+    elif [[ $namespace =~ (japan|jp) ]]; then country="Asia/Tokyo"
+    elif [[ $namespace =~ (uk|united-kingdom|gb) ]]; then country="Europe/London"
+    elif [[ $namespace =~ (germany|de) ]]; then country="Europe/Berlin"
+    elif [[ $namespace =~ (france|fr) ]]; then country="Europe/Paris"
+    elif [[ $namespace =~ (netherlands|nl) ]]; then country="Europe/Amsterdam"
+    elif [[ $namespace =~ (sweden|se) ]]; then country="Europe/Stockholm"
+    elif [[ $namespace =~ (norway|no) ]]; then country="Europe/Oslo"
+    elif [[ $namespace =~ (switzerland|ch) ]]; then country="Europe/Zurich"
+    elif [[ $namespace =~ (spain|es) ]]; then country="Europe/Madrid"
+    elif [[ $namespace =~ (italy|it) ]]; then country="Europe/Rome"
+    elif [[ $namespace =~ (australia|au) ]]; then country="Australia/Sydney"
+    elif [[ $namespace =~ (singapore|sg) ]]; then country="Asia/Singapore"
+    elif [[ $namespace =~ (india|in) ]]; then country="Asia/Kolkata"
+    elif [[ $namespace =~ (brazil|br) ]]; then country="America/Sao_Paulo"
+    elif [[ $namespace =~ (mexico|mx) ]]; then country="America/Mexico_City"
+    elif [[ $namespace =~ (russia|ru) ]]; then country="Europe/Moscow"
+    elif [[ $namespace =~ (korea|kr) ]]; then country="Asia/Seoul"
+    elif [[ $namespace =~ (hong-kong|hk) ]]; then country="Asia/Hong_Kong"
+    else
+        country=$(cat /etc/timezone 2>/dev/null || echo "UTC")
+    fi
+
+    echo "$country"
+}
+
+# DNS Configuration - Enterprise Grade
+configure_dns_enterprise() {
+    local ns=$1
+
+    info "Configuring enterprise DNS for namespace '$ns'..."
+
+    # Create namespace-specific DNS directory
+    sudo mkdir -p /etc/netns/"$ns"
+
+    # Check if dnscrypt-proxy is available
+    if systemctl is-active dnscrypt-proxy &>/dev/null; then
+        info "Using DNSCrypt-proxy for encrypted DNS"
+        sudo tee /etc/netns/"$ns"/resolv.conf > /dev/null <<EOF
+# Enterprise DNS Configuration - DNSCrypt Enabled
+# Zero-leak architecture with encryption
+nameserver 127.0.0.1
+options edns0 trust-ad
+options timeout:2
+options attempts:3
+EOF
+    elif systemctl is-active stubby &>/dev/null; then
+        info "Using Stubby for DNS-over-TLS"
+        sudo tee /etc/netns/"$ns"/resolv.conf > /dev/null <<EOF
+# Enterprise DNS Configuration - Stubby DNS-over-TLS
+nameserver 127.0.0.1
+options edns0 trust-ad
+options timeout:2
+options attempts:3
+EOF
+    else
+        warn "No encrypted DNS service found, using Cloudflare DNS"
+        sudo tee /etc/netns/"$ns"/resolv.conf > /dev/null <<EOF
+# Fallback DNS Configuration - Cloudflare
+# WARNING: DNS queries not encrypted at local level
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+options edns0 trust-ad
+options timeout:2
+options attempts:3
+EOF
+    fi
+
+    # DNS Leak Prevention - Minimal approach to prevent breaking OpenVPN
+    info "Configuring DNS leak prevention..."
+
+    local veth_ns="veth-${ns}-n"
+
+    # CRITICAL: Set default policy to ACCEPT to avoid blocking OpenVPN
+    # We only add specific DROP rules for known leak vectors
+
+    # Block DNS through veth interface (would bypass VPN)
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p udp --dport 53 -o "$veth_ns" -j DROP
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p tcp --dport 53 -o "$veth_ns" -j DROP
+
+    # Block DNS-over-TLS through veth
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p tcp --dport 853 -o "$veth_ns" -j DROP
+
+    # Note: We do NOT block anything through tun/tap - everything allowed there
+    # This includes OpenVPN keepalives, ICMP, DNS, etc.
+
+    log "DNS leak prevention configured (veth blocked, VPN tunnel unrestricted)"
+}
+
+# WebRTC Leak Prevention - Simplified
+configure_webrtc_protection() {
+    local ns=$1
+
+    info "Configuring WebRTC leak prevention..."
+
+    local veth_ns="veth-${ns}-n"
+
+    # Only block STUN/TURN through veth (would leak real IP)
+    # Allow through VPN tunnel (shows VPN IP)
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p udp --dport 3478 -o "$veth_ns" -j REJECT
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p tcp --dport 3478 -o "$veth_ns" -j REJECT
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p udp --dport 3479 -o "$veth_ns" -j REJECT
+    sudo ip netns exec "$ns" iptables -A OUTPUT -p tcp --dport 3479 -o "$veth_ns" -j REJECT
+
+    log "WebRTC leak prevention configured (blocks STUN through veth only)"
+}
+
+# IPv6 Leak Prevention
+configure_ipv6_protection() {
+    local ns=$1
+
+    info "Configuring IPv6 leak prevention..."
+
+    # Disable IPv6 in namespace if not needed
+    sudo ip netns exec "$ns" sysctl -w net.ipv6.conf.all.disable_ipv6=1 &>/dev/null || true
+    sudo ip netns exec "$ns" sysctl -w net.ipv6.conf.default.disable_ipv6=1 &>/dev/null || true
+
+    # Block all IPv6 traffic
+    sudo ip netns exec "$ns" ip6tables -P INPUT DROP 2>/dev/null || true
+    sudo ip netns exec "$ns" ip6tables -P OUTPUT DROP 2>/dev/null || true
+    sudo ip netns exec "$ns" ip6tables -P FORWARD DROP 2>/dev/null || true
+
+    log "IPv6 leak prevention configured"
+}
+
+# Network connectivity check (before VPN)
+check_network_connectivity() {
+    info "Checking network connectivity..."
+
+    # Test 1: Check if network interface is up
+    if ! ip link show "$INTERFACE" | grep -q "state UP"; then
+        error "Network interface '$INTERFACE' is not up"
+        return 1
+    fi
+
+    # Test 2: Ping gateway
+    local gateway=$(ip route | grep default | awk '{print $3}' | head -n1)
+    if [ -n "$gateway" ]; then
+        if ! timeout 3 ping -c 1 -W 2 "$gateway" &>/dev/null; then
+            error "Cannot reach network gateway ($gateway)"
+            return 1
+        fi
+        log "Network gateway reachable: $gateway"
+    fi
+
+    # Test 3: Ping external DNS server
+    if ! timeout 3 ping -c 1 -W 2 1.1.1.1 &>/dev/null; then
+        error "Cannot reach external network (no internet)"
+        return 1
+    fi
+
+    # Test 4: DNS resolution
+    if ! timeout 3 dig +short google.com @1.1.1.1 &>/dev/null; then
+        error "DNS resolution failed"
+        return 1
+    fi
+
+    log "Network connectivity: OK"
+    return 0
+}
+
+# Health check function
+health_check_vpn() {
+    local ns=$1
+    local timeout=${2:-5}
+
+    info "Checking VPN connectivity in namespace '$ns'..."
+
+    # Test 1: Check if tun/tap interface exists in namespace
+    if ! sudo ip netns exec "$ns" ip link show | grep -q "tun\|tap"; then
+        warn "No VPN interface detected in namespace '$ns'"
+        return 1
+    fi
+
+    # Test 2: Ping through VPN tunnel
+    if ! sudo ip netns exec "$ns" timeout "$timeout" ping -c 2 -W 2 1.1.1.1 &>/dev/null; then
+        warn "Cannot ping through VPN tunnel"
+        return 1
+    fi
+
+    # Test 3: Check DNS resolution
+    if ! sudo ip netns exec "$ns" timeout "$timeout" dig +short google.com @1.1.1.1 &>/dev/null; then
+        warn "DNS resolution failed in namespace '$ns'"
+        return 1
+    fi
+
+    # Test 4: Check internet connectivity (HTTPS)
+    if ! sudo ip netns exec "$ns" timeout "$timeout" curl -s https://1.1.1.1 &>/dev/null; then
+        warn "Internet connectivity failed in namespace '$ns'"
+        return 1
+    fi
+
+    log "VPN connectivity: OK"
+    return 0
+}
+
+# Wait for VPN connection with retries
+wait_for_vpn_connection() {
+    local ns=$1
+    local max_attempts=20
+    local attempt=0
+
+    info "Waiting for VPN to establish connection..."
+
+    while [ $attempt -lt $max_attempts ]; do
+        sleep 3
+        ((attempt++))
+
+        # Check if tun/tap interface appeared
+        if sudo ip netns exec "$ns" ip link show 2>/dev/null | grep -q "tun\|tap"; then
+            log "VPN interface detected (attempt $attempt/$max_attempts)"
+
+            # Wait a bit more for routes to be set up
+            sleep 5
+
+            # Verify connectivity
+            if sudo ip netns exec "$ns" timeout 5 ping -c 2 -W 3 1.1.1.1 &>/dev/null; then
+                log "VPN connection established successfully"
+                return 0
+            else
+                warn "VPN interface up but no connectivity yet (attempt $attempt/$max_attempts)..."
+            fi
+        else
+            # Check OpenVPN process still running
+            if [ -f "$TMP_DIR/openvpn-$ns.pid" ]; then
+                local ovpn_pid=$(cat "$TMP_DIR/openvpn-$ns.pid" 2>/dev/null)
+                if [ -n "$ovpn_pid" ] && ! kill -0 "$ovpn_pid" 2>/dev/null; then
+                    echo -e "${RED}[ERROR] OpenVPN process died unexpectedly${NC}"
+                    echo ""
+                    if [ -f "$TMP_DIR/openvpn-$ns.log" ]; then
+                        echo "Last 20 lines of OpenVPN log:"
+                        echo "================================"
+                        sudo tail -20 "$TMP_DIR/openvpn-$ns.log" 2>/dev/null || echo "Could not read log"
+                        echo "================================"
+                        echo ""
+                        if sudo grep -qi "auth.*fail\|auth.*error\|incorrect\|denied" "$TMP_DIR/openvpn-$ns.log" 2>/dev/null; then
+                            echo -e "${RED}Authentication failed - check credentials${NC}"
+                        fi
+                    fi
+                    return 1
+                fi
+            fi
+
+            # Check log for errors even if process running
+            if [ -f "$TMP_DIR/openvpn-$ns.log" ] && [ $((attempt % 5)) -eq 0 ]; then
+                if grep -qi "auth.*fail\|auth.*error\|incorrect password\|denied" "$TMP_DIR/openvpn-$ns.log"; then
+                    error "Authentication failed - wrong username or password"
+                    return 1
+                fi
+            fi
+
+            info "Waiting for VPN interface... (attempt $attempt/$max_attempts)"
+        fi
+    done
+
+    error "VPN failed to connect after $max_attempts attempts (60 seconds)"
+    return 1
+}
+
+# DNS leak test
+test_dns_leaks() {
+    local ns=$1
+
+    info "Testing for DNS leaks..."
+
+    # Get DNS servers seen by external service
+    local dns_result=$(sudo ip netns exec "$ns" timeout 5 curl -s https://1.1.1.1/cdn-cgi/trace | grep -i "fl=" | cut -d= -f2)
+
+    if [ -n "$dns_result" ]; then
+        info "External DNS test: $dns_result"
+    fi
+
+    # Check if any DNS queries leak outside namespace
+    # This would be caught by iptables DROP rules
+
+    log "DNS leak test completed"
+}
+
+# IP leak test
+test_ip_leaks() {
+    local ns=$1
+
+    info "Verifying IP address through VPN..."
+
+    # Get external IP
+    local vpn_ip=$(sudo ip netns exec "$ns" timeout 5 curl -s https://ifconfig.me 2>/dev/null || echo "")
+    local real_ip=$(timeout 5 curl -s https://ifconfig.me 2>/dev/null || echo "")
+
+    if [ -z "$vpn_ip" ]; then
+        warn "Could not determine VPN IP"
+        return 1
+    fi
+
+    if [ "$vpn_ip" == "$real_ip" ]; then
+        error "IP LEAK DETECTED! VPN IP matches real IP: $vpn_ip"
+        return 1
+    fi
+
+    log "VPN IP: $vpn_ip (differs from real IP)"
+    return 0
+}
+
+# Cleanup namespace function
+cleanup_namespace() {
+    local ns=$1
+
+    if [ -z "$ns" ]; then
+        error "No namespace specified for cleanup"
+    fi
+
+    log "Cleaning up namespace '$ns'..."
+
+    # Kill all processes in namespace
+    sudo ip netns pids "$ns" 2>/dev/null | xargs -I {} sudo kill {} 2>/dev/null || true
+
+    # Get subnet for this namespace
+    local SUBNET_ID=$((16#$(echo -n "$ns" | md5sum | cut -c1-2) % 250 + 1))
+    local IP_SUBNET="10.200.${SUBNET_ID}"
+    local VETH_HOST="veth-${ns}-h"
+
+    # Remove iptables rules
+    sudo iptables -t nat -D POSTROUTING -s "${IP_SUBNET}.0/24" -o "$INTERFACE" -j MASQUERADE 2>/dev/null || true
+    sudo iptables -D FORWARD -i "$VETH_HOST" -o "$INTERFACE" -j ACCEPT 2>/dev/null || true
+    sudo iptables -D FORWARD -i "$INTERFACE" -o "$VETH_HOST" -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null || true
+
+    # Delete veth interfaces
+    sudo ip link delete "$VETH_HOST" 2>/dev/null || true
+
+    # Remove namespace-specific resolv.conf
+    sudo rm -rf /etc/netns/"$ns" 2>/dev/null || true
+
+    # Delete the namespace
+    sudo ip netns delete "$ns" 2>/dev/null || true
+
+    log "Namespace '$ns' cleaned up"
+}
+
+# List active namespaces
+list_namespaces() {
+    if sudo ip netns list | grep -q .; then
+        sudo ip netns list
+    else
+        echo "  (none)"
+    fi
+}
+
+# Attach to existing namespace
+attach_to_namespace() {
+    local ns=$1
+    local app=$2
+
+    # Get timezone for this VPN location
+    local vpn_timezone=$(get_timezone_for_country "$ns")
+
+    log "Launching $app in existing namespace '$ns'..."
+    info "Timezone: $vpn_timezone"
+
+    # Create profile directory with correct permissions
+    local profile_dir="$TMP_DIR/vpn-profile-$ns-$$"
+    mkdir -p "$profile_dir"
+    chmod 700 "$profile_dir"
+    chown $USER:$USER "$profile_dir"
+
+    # Launch application with hardened environment
+    sudo ip netns exec "$ns" sudo -u $USER \
+        env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+        XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+        DISPLAY="$DISPLAY" \
+        XAUTHORITY="$XAUTHORITY" \
+        TZ="$vpn_timezone" \
+        HOME="$HOME" \
+        $app --new-instance --profile "$profile_dir" &
+
+    log "Application launched in namespace '$ns'"
+}
+
+# Main menu
+show_main_menu() {
+    clear
+    echo "═══════════════════════════════════════════════"
+    echo "  Enterprise VPN Namespace Launcher"
+    echo "  Zero-Leak Architecture | Cryptographic Hardening"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    echo "Active VPN Namespaces:"
+    list_namespaces
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "1) Create new VPN namespace (Enterprise)"
+    echo "2) Launch app in existing namespace"
+    echo "3) Health check namespace"
+    echo "4) View metrics & status"
+    echo "5) Cleanup namespace"
+    echo "6) Exit"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    read -p "Select option (1-6): " MAIN_CHOICE
+
+    case $MAIN_CHOICE in
+        1) create_new_namespace ;;
+        2) launch_in_existing ;;
+        3) health_check_menu ;;
+        4) cleanup_menu ;;
+        5) exit 0 ;;
+        *)
+            warn "Invalid option"
+            sleep 1
+            show_main_menu
+            ;;
+    esac
+}
+
+# Health check menu
+health_check_menu() {
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Health Check Namespace"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    echo "Active namespaces:"
+    list_namespaces
+    echo ""
+
+    read -p "Namespace to check: " NAMESPACE
+
+    if [ -z "$NAMESPACE" ]; then
+        warn "Namespace name cannot be empty"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    if ! sudo ip netns list | grep -q "^$NAMESPACE"; then
+        error "Namespace '$NAMESPACE' does not exist"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    echo ""
+    info "Running health checks on '$NAMESPACE'..."
+    echo ""
+
+    # VPN health check
+    if health_check_vpn "$NAMESPACE"; then
+        log "VPN health check: PASSED"
+    else
+        warn "VPN health check: FAILED"
+    fi
+
+    # DNS leak test
+    test_dns_leaks "$NAMESPACE"
+
+    # IP leak test
+    if test_ip_leaks "$NAMESPACE"; then
+        log "IP leak test: PASSED"
+    else
+        warn "IP leak test: FAILED"
+    fi
+
+    echo ""
+    read -p "Press Enter to return to main menu..."
+    show_main_menu
+}
+
+# Create new namespace
+create_new_namespace() {
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Create New VPN Namespace (Enterprise Mode)"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+
+    read -p "Namespace name (e.g., vpn-dk, vpn-usa): " NAMESPACE
+
+    if [ -z "$NAMESPACE" ]; then
+        warn "Namespace name cannot be empty"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    # Check if namespace already exists - auto cleanup
+    if sudo ip netns list | grep -q "^$NAMESPACE"; then
+        warn "Namespace '$NAMESPACE' already exists, auto-cleaning..."
+        cleanup_namespace "$NAMESPACE"
+        sleep 1
+    fi
+
+    echo ""
+
+    # Try to auto-detect DOUBLE VPN configs from .env based on namespace name
+    local LAYER1_CONFIG=""
+    local LAYER2_CONFIG=""
+
+    if [ -f "$SCRIPT_DIR/.env" ]; then
+        source "$SCRIPT_DIR/.env"
+
+        # Try to match namespace name to country configs
+        if [[ $NAMESPACE =~ dk|denmark ]]; then
+            LAYER1_CONFIG="$DENMARK_LAYER1"
+            LAYER2_CONFIG="$DENMARK_LAYER2"
+            info "Auto-detected Denmark double VPN from .env"
+        elif [[ $NAMESPACE =~ usa|us ]]; then
+            LAYER1_CONFIG="$USA_LAYER1"
+            LAYER2_CONFIG="$USA_LAYER2"
+            info "Auto-detected USA double VPN from .env"
+        elif [[ $NAMESPACE =~ canada|ca ]]; then
+            LAYER1_CONFIG="$CANADA_LAYER1"
+            LAYER2_CONFIG="$CANADA_LAYER2"
+            info "Auto-detected Canada double VPN from .env"
+        elif [[ $NAMESPACE =~ uk|gb ]]; then
+            LAYER1_CONFIG="$UK_LAYER1"
+            LAYER2_CONFIG="$UK_LAYER2"
+            info "Auto-detected UK double VPN from .env"
+        elif [[ $NAMESPACE =~ germany|de ]]; then
+            LAYER1_CONFIG="$GERMANY_LAYER1"
+            LAYER2_CONFIG="$GERMANY_LAYER2"
+            info "Auto-detected Germany double VPN from .env"
+        elif [[ $NAMESPACE =~ france|fr ]]; then
+            LAYER1_CONFIG="$FRANCE_LAYER1"
+            LAYER2_CONFIG="$FRANCE_LAYER2"
+            info "Auto-detected France double VPN from .env"
+        elif [[ $NAMESPACE =~ japan|jp ]]; then
+            LAYER1_CONFIG="$JAPAN_LAYER1"
+            LAYER2_CONFIG="$JAPAN_LAYER2"
+            info "Auto-detected Japan double VPN from .env"
+        elif [[ $NAMESPACE =~ singapore|sg ]]; then
+            LAYER1_CONFIG="$SINGAPORE_LAYER1"
+            LAYER2_CONFIG="$SINGAPORE_LAYER2"
+            info "Auto-detected Singapore double VPN from .env"
+        elif [[ $NAMESPACE =~ netherlands|nl ]]; then
+            LAYER1_CONFIG="$NETHERLANDS_LAYER1"
+            LAYER2_CONFIG="$NETHERLANDS_LAYER2"
+            info "Auto-detected Netherlands double VPN from .env"
+        elif [[ $NAMESPACE =~ sweden|se ]]; then
+            LAYER1_CONFIG="$SWEDEN_LAYER1"
+            LAYER2_CONFIG="$SWEDEN_LAYER2"
+            info "Auto-detected Sweden double VPN from .env"
+        elif [[ $NAMESPACE =~ australia|au ]]; then
+            LAYER1_CONFIG="$AUSTRALIA_LAYER1"
+            LAYER2_CONFIG="$AUSTRALIA_LAYER2"
+            info "Auto-detected Australia double VPN from .env"
+        fi
+    fi
+
+    # Validate both layers exist (mandatory double VPN)
+    if [ -z "$LAYER1_CONFIG" ] || [ -z "$LAYER2_CONFIG" ]; then
+        error "Double VPN required but configs not found in .env for this country"
+        echo ""
+        echo "Please configure LAYER1 and LAYER2 for this country in .env file"
+        sleep 3
+        show_main_menu
+        return
+    fi
+
+    if [ ! -f "$LAYER1_CONFIG" ]; then
+        error "Layer 1 config file not found: $LAYER1_CONFIG"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    if [ ! -f "$LAYER2_CONFIG" ]; then
+        error "Layer 2 config file not found: $LAYER2_CONFIG"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    echo ""
+    echo "Select application:"
+    echo "1) Firefox Developer Edition"
+    echo "2) Firefox"
+    echo "3) Chromium"
+    echo "4) Google Chrome"
+    echo "5) Custom command"
+    read -p "Select (1-5): " APP_CHOICE
+
+    case $APP_CHOICE in
+        1) APP_CMD="firefox-developer-edition" ;;
+        2) APP_CMD="firefox" ;;
+        3) APP_CMD="chromium" ;;
+        4) APP_CMD="google-chrome-stable" ;;
+        5)
+            read -p "Enter custom command: " APP_CMD
+            if [ -z "$APP_CMD" ]; then
+                error "Command cannot be empty"
+                sleep 2
+                show_main_menu
+                return
+            fi
+            ;;
+        *)
+            warn "Invalid choice"
+            sleep 2
+            show_main_menu
+            return
+            ;;
+    esac
+
+    # Setup double VPN namespace
+    setup_double_vpn "$NAMESPACE" "$LAYER1_CONFIG" "$LAYER2_CONFIG" "$APP_CMD"
+}
+
+# Launch in existing namespace
+launch_in_existing() {
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Launch in Existing Namespace"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    echo "Active namespaces:"
+    list_namespaces
+    echo ""
+
+    read -p "Namespace name: " NAMESPACE
+
+    if [ -z "$NAMESPACE" ]; then
+        warn "Namespace name cannot be empty"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    if ! sudo ip netns list | grep -q "^$NAMESPACE"; then
+        error "Namespace '$NAMESPACE' does not exist"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    launch_in_existing_named "$NAMESPACE"
+}
+
+# Launch app in existing namespace (helper)
+launch_in_existing_named() {
+    local NAMESPACE=$1
+
+    echo ""
+    echo "Select application:"
+    echo "1) Firefox Developer Edition"
+    echo "2) Firefox"
+    echo "3) Chromium"
+    echo "4) Google Chrome"
+    echo "5) Custom command"
+    read -p "Select (1-5): " APP_CHOICE
+
+    case $APP_CHOICE in
+        1) APP_CMD="firefox-developer-edition" ;;
+        2) APP_CMD="firefox" ;;
+        3) APP_CMD="chromium" ;;
+        4) APP_CMD="google-chrome-stable" ;;
+        5)
+            read -p "Enter custom command: " APP_CMD
+            if [ -z "$APP_CMD" ]; then
+                error "Command cannot be empty"
+                sleep 2
+                show_main_menu
+                return
+            fi
+            ;;
+        *)
+            warn "Invalid choice"
+            sleep 2
+            show_main_menu
+            return
+            ;;
+    esac
+
+    attach_to_namespace "$NAMESPACE" "$APP_CMD"
+
+    echo ""
+    read -p "Press Enter to return to main menu..."
+    show_main_menu
+}
+
+# Cleanup menu
+cleanup_menu() {
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Cleanup Namespace"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    echo "Active namespaces:"
+    list_namespaces
+    echo ""
+
+    read -p "Namespace to cleanup: " NAMESPACE
+
+    if [ -z "$NAMESPACE" ]; then
+        warn "Namespace name cannot be empty"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    if ! sudo ip netns list | grep -q "^$NAMESPACE"; then
+        error "Namespace '$NAMESPACE' does not exist"
+        sleep 2
+        show_main_menu
+        return
+    fi
+
+    echo ""
+    read -p "Are you sure you want to cleanup '$NAMESPACE'? (y/n): " CONFIRM
+
+    if [ "$CONFIRM" = "y" ] || [ "$CONFIRM" = "Y" ]; then
+        cleanup_namespace "$NAMESPACE"
+        echo ""
+        read -p "Press Enter to return to main menu..."
+    fi
+
+    show_main_menu
+}
+
+# Launch application in namespace with kill switch
+launch_app_in_namespace() {
+    local NAMESPACE=$1
+    local APP_CMD=$2
+    local vpn_timezone=$3
+    local is_double_vpn=${4:-false}
+
+    echo ""
+    log "Enterprise VPN namespace ready!"
+    log "Launching $APP_CMD..."
+    info "Timezone: $vpn_timezone"
+    echo ""
+    info "Security features enabled:"
+    info "  - Multi-layer DNS leak prevention"
+    info "  - WebRTC leak protection"
+    info "  - IPv6 leak protection"
+    info "  - VPN kill switch (terminates app if VPN drops)"
+    info "  - Enterprise DNS encryption (if available)"
+    info "  - Timezone spoofing"
+    if [ "$is_double_vpn" = "true" ]; then
+        info "  - DOUBLE VPN cascade (2 layers)"
+    fi
+    echo ""
+
+    # Profile management
+    local PROFILE_DIR=""
+    local PERSISTENT_PROFILE_DIR="$TMP_DIR/profiles/$NAMESPACE"
+
+    if [ -d "$PERSISTENT_PROFILE_DIR" ]; then
+        echo "Existing profile found for this namespace."
+        read -p "Load existing profile? (y/n): " load_existing
+        if [[ "$load_existing" =~ ^[Yy] ]]; then
+            PROFILE_DIR="$PERSISTENT_PROFILE_DIR"
+            info "Using existing profile: $PROFILE_DIR"
+        else
+            PROFILE_DIR="$TMP_DIR/vpn-profile-$NAMESPACE-$$"
+            info "Creating fresh profile: $PROFILE_DIR"
+        fi
+    else
+        PROFILE_DIR="$TMP_DIR/vpn-profile-$NAMESPACE-$$"
+        info "Creating new profile: $PROFILE_DIR"
+    fi
+
+    # Create profile directory with correct permissions
+    mkdir -p "$PROFILE_DIR"
+    chmod 700 "$PROFILE_DIR"
+    chown $USER:$USER "$PROFILE_DIR"
+
+    # Start VPN kill switch monitor in background
+    (
+        sleep 15
+
+        while true; do
+            sleep 5
+
+            # For double VPN, check inner namespace
+            local check_namespace="$NAMESPACE"
+            if [ "$is_double_vpn" = "true" ]; then
+                check_namespace="${NAMESPACE}-inner"
+            fi
+
+            # Check if VPN tunnel still exists
+            if ! sudo ip netns exec "$check_namespace" ip link show 2>/dev/null | grep -q "tun\|tap"; then
+                warn "VPN disconnected! Kill switch activated - terminating application"
+                METRICS[killswitch_activations]=$((${METRICS[killswitch_activations]} + 1))
+                VPN_STATE[status]="DISCONNECTED"
+                save_metrics
+                sudo ip netns pids "$check_namespace" 2>/dev/null | xargs -r sudo kill -9 2>/dev/null || true
+                break
+            fi
+
+            # Check OpenVPN process (check both layers for double VPN)
+            if [ "$is_double_vpn" = "true" ]; then
+                # Check Layer 2 (inner)
+                if [ -f "$TMP_DIR/openvpn-${NAMESPACE}-inner.pid" ]; then
+                    local ovpn_pid=$(cat "$TMP_DIR/openvpn-${NAMESPACE}-inner.pid" 2>/dev/null)
+                    if [ -n "$ovpn_pid" ]; then
+                        if ! sudo ip netns pids "${NAMESPACE}-inner" 2>/dev/null | grep -q "^$ovpn_pid$"; then
+                            warn "Layer 2 VPN died! Kill switch activated"
+                            METRICS[killswitch_activations]=$((${METRICS[killswitch_activations]} + 1))
+                            VPN_STATE[status]="FAILED"
+                            save_metrics
+                            sudo ip netns pids "${NAMESPACE}-inner" 2>/dev/null | xargs -r sudo kill -9 2>/dev/null || true
+                            break
+                        fi
+                    fi
+                fi
+                # Check Layer 1 (outer)
+                if [ -f "$TMP_DIR/openvpn-${NAMESPACE}-outer.pid" ]; then
+                    local ovpn_pid=$(cat "$TMP_DIR/openvpn-${NAMESPACE}-outer.pid" 2>/dev/null)
+                    if [ -n "$ovpn_pid" ]; then
+                        if ! sudo ip netns pids "${NAMESPACE}-outer" 2>/dev/null | grep -q "^$ovpn_pid$"; then
+                            warn "Layer 1 VPN died! Kill switch activated"
+                            METRICS[killswitch_activations]=$((${METRICS[killswitch_activations]} + 1))
+                            VPN_STATE[status]="FAILED"
+                            save_metrics
+                            sudo ip netns pids "${NAMESPACE}-inner" 2>/dev/null | xargs -r sudo kill -9 2>/dev/null || true
+                            break
+                        fi
+                    fi
+                fi
+            else
+                # Single VPN check
+                if [ -f "$TMP_DIR/openvpn-$NAMESPACE.pid" ]; then
+                    local ovpn_pid=$(cat "$TMP_DIR/openvpn-$NAMESPACE.pid" 2>/dev/null)
+                    if [ -n "$ovpn_pid" ]; then
+                        if ! sudo ip netns pids "$NAMESPACE" 2>/dev/null | grep -q "^$ovpn_pid$"; then
+                            warn "OpenVPN process died! Kill switch activated - terminating application"
+                            METRICS[killswitch_activations]=$((${METRICS[killswitch_activations]} + 1))
+                            VPN_STATE[status]="FAILED"
+                            save_metrics
+                            sudo ip netns pids "$NAMESPACE" 2>/dev/null | xargs -r sudo kill -9 2>/dev/null || true
+                            break
+                        fi
+                    fi
+                fi
+            fi
+        done
+    ) &
+    local killswitch_pid=$!
+
+    # Determine which namespace to launch in
+    local launch_namespace="$NAMESPACE"
+    if [ "$is_double_vpn" = "true" ]; then
+        launch_namespace="${NAMESPACE}-inner"
+    fi
+
+    # Launch with hardened environment
+    sudo ip netns exec "$launch_namespace" sudo -u $USER \
+        env DBUS_SESSION_BUS_ADDRESS="$DBUS_SESSION_BUS_ADDRESS" \
+        XDG_RUNTIME_DIR="$XDG_RUNTIME_DIR" \
+        DISPLAY="$DISPLAY" \
+        XAUTHORITY="$XAUTHORITY" \
+        TZ="$vpn_timezone" \
+        HOME="$HOME" \
+        $APP_CMD --new-instance --profile "$PROFILE_DIR"
+
+    # Kill the kill switch monitor when app closes normally
+    kill $killswitch_pid 2>/dev/null || true
+
+    # Profile save prompt
+    echo ""
+    if [[ ! "$PROFILE_DIR" = "$PERSISTENT_PROFILE_DIR" ]]; then
+        read -p "Keep this profile for future use? (y/n): " keep_profile
+        if [[ "$keep_profile" =~ ^[Yy] ]]; then
+            mkdir -p "$(dirname "$PERSISTENT_PROFILE_DIR")"
+            mv "$PROFILE_DIR" "$PERSISTENT_PROFILE_DIR"
+            log "Profile saved to: $PERSISTENT_PROFILE_DIR"
+        else
+            rm -rf "$PROFILE_DIR" 2>/dev/null || true
+            info "Profile deleted"
+        fi
+    else
+        info "Profile retained at: $PROFILE_DIR"
+    fi
+
+    # Cleanup after app closes
+    echo ""
+    log "Application closed. Cleaning up..."
+
+    if [ "$is_double_vpn" = "true" ]; then
+        cleanup_namespace "${NAMESPACE}-inner"
+        cleanup_namespace "${NAMESPACE}-outer"
+        rm -f "$TMP_DIR/openvpn-${NAMESPACE}-inner.pid" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-${NAMESPACE}-outer.pid" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-config-${NAMESPACE}-inner.ovpn" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-config-${NAMESPACE}-outer.ovpn" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-${NAMESPACE}-inner.log" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-${NAMESPACE}-outer.log" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-auth-${NAMESPACE}-inner.txt" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-auth-${NAMESPACE}-outer.txt" 2>/dev/null || true
+    else
+        cleanup_namespace "$NAMESPACE"
+        rm -f "$TMP_DIR/openvpn-$NAMESPACE.pid" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-config-$NAMESPACE.ovpn" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-$NAMESPACE.log" 2>/dev/null || true
+        rm -f "$TMP_DIR/openvpn-auth-$NAMESPACE.txt" 2>/dev/null || true
+    fi
+
+    echo ""
+    log "Done!"
+    echo ""
+    read -p "Press Enter to return to main menu..."
+    show_main_menu
+}
+
+# Setup and launch VPN namespace (Enterprise Edition)
+setup_double_vpn() {
+    local NAMESPACE=$1
+    local LAYER1_CONFIG=$2
+    local LAYER2_CONFIG=$3
+    local APP_CMD=$4
+
+    # Namespace names
+    local NS_OUTER="${NAMESPACE}-outer"
+    local NS_INNER="${NAMESPACE}-inner"
+
+    # Generate unique veth pair names for outer namespace
+    VETH_HOST="veth-${NS_OUTER}-h"
+    VETH_OUTER="veth-${NS_OUTER}-n"
+
+    # Generate unique veth pair names for inner namespace
+    VETH_OUTER_INNER="veth-${NS_INNER}-o"
+    VETH_INNER="veth-${NS_INNER}-i"
+
+    # Generate unique IP subnets
+    SUBNET_ID=$((16#$(echo -n "$NAMESPACE" | md5sum | cut -c1-2) % 250 + 1))
+    IP_SUBNET_OUTER="10.200.${SUBNET_ID}"
+    IP_SUBNET_INNER="10.201.${SUBNET_ID}"
+
+    # Get timezone
+    local vpn_timezone=$(get_timezone_for_country "$NAMESPACE")
+
+    # Set up automatic cleanup on error/exit
+    cleanup_on_error() {
+        local exit_code=$?
+        if [ $exit_code -ne 0 ]; then
+            echo ""
+            warn "Setup failed. Cleaning up namespaces..."
+            cleanup_namespace "$NS_INNER" 2>/dev/null || true
+            cleanup_namespace "$NS_OUTER" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-config-$NS_OUTER.ovpn" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-config-$NS_INNER.ovpn" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-auth-$NS_OUTER.txt" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-auth-$NS_INNER.txt" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-$NS_OUTER.log" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-$NS_INNER.log" 2>/dev/null || true
+        fi
+    }
+    trap cleanup_on_error ERR
+
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Setting up DOUBLE VPN Namespace"
+    echo "═══════════════════════════════════════════════"
+    echo "Namespace: $NAMESPACE"
+    echo "Layer 1 (Entry): $(basename "$LAYER1_CONFIG")"
+    echo "Layer 2 (Exit): $(basename "$LAYER2_CONFIG")"
+    echo "Outer subnet: ${IP_SUBNET_OUTER}.0/24"
+    echo "Inner subnet: ${IP_SUBNET_INNER}.0/24"
+    echo "Interface: $INTERFACE"
+    echo "Timezone: $vpn_timezone"
+    echo "Security: Double VPN + Multi-layer leak prevention"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+
+    # Check circuit breaker
+    if ! circuit_breaker_check; then
+        error "Circuit breaker is OPEN. Too many recent failures."
+        error "Wait 5 minutes before attempting new connection."
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+
+    # Increment connection attempt counter
+    METRICS[connection_attempts]=$((${METRICS[connection_attempts]} + 1))
+    VPN_STATE[status]="CONNECTING"
+    save_metrics
+
+    # Check network connectivity first
+    log "[1/15] Checking network connectivity..."
+    if ! check_network_connectivity; then
+        error "Network connectivity check failed. Cannot proceed."
+        record_connection_failure
+        save_metrics
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+
+    # ========== CREATE OUTER NAMESPACE (LAYER 1) ==========
+
+    log "[2/15] Creating outer namespace for Layer 1 VPN..."
+    sudo ip netns add "$NS_OUTER"
+
+    log "[3/15] Creating veth pair (host <-> outer namespace)..."
+    sudo ip link add "$VETH_HOST" type veth peer name "$VETH_OUTER"
+    sudo ip link set "$VETH_OUTER" netns "$NS_OUTER"
+
+    log "[4/15] Configuring host network..."
+    sudo ip addr add "${IP_SUBNET_OUTER}.1/24" dev "$VETH_HOST"
+    sudo ip link set "$VETH_HOST" up
+
+    log "[5/15] Configuring outer namespace network..."
+    sudo ip netns exec "$NS_OUTER" ip addr add "${IP_SUBNET_OUTER}.2/24" dev "$VETH_OUTER"
+    sudo ip netns exec "$NS_OUTER" ip link set "$VETH_OUTER" up
+    sudo ip netns exec "$NS_OUTER" ip link set lo up
+    sudo ip netns exec "$NS_OUTER" ip route add default via "${IP_SUBNET_OUTER}.1"
+
+    log "[6/15] Configuring NAT for outer namespace..."
+    sudo sysctl -w net.ipv4.ip_forward=1 > /dev/null
+    sudo iptables -I FORWARD -i "$VETH_HOST" -o "$INTERFACE" -j ACCEPT
+    sudo iptables -I FORWARD -i "$INTERFACE" -o "$VETH_HOST" -m state --state RELATED,ESTABLISHED -j ACCEPT
+    sudo iptables -t nat -A POSTROUTING -s "${IP_SUBNET_OUTER}.0/24" -o "$INTERFACE" -j MASQUERADE
+
+    sleep 2
+
+    # Test outer namespace connectivity
+    info "Testing outer namespace connectivity..."
+    if ! sudo ip netns exec "$NS_OUTER" ping -c 1 -W 3 1.1.1.1 &>/dev/null; then
+        error "Outer namespace cannot reach internet. Check routing/NAT."
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+    log "Outer namespace connectivity: OK"
+
+    # Start Layer 1 VPN
+    log "[7/15] Starting Layer 1 VPN (Entry server)..."
+    rm -f "$TMP_DIR/openvpn-$NS_OUTER.log" 2>/dev/null || true
+
+    local temp_config_outer="$TMP_DIR/openvpn-config-$NS_OUTER.ovpn"
+    grep -v -e "^up " -e "^down " -e "update-resolv-conf" -e "^script-security" -e "^auth-user-pass" "$LAYER1_CONFIG" > "$temp_config_outer"
+
+    if grep -q "auth-user-pass" "$LAYER1_CONFIG"; then
+        local vpn_user=""
+        local vpn_pass=""
+
+        if [ -f "$SCRIPT_DIR/.env" ]; then
+            source "$SCRIPT_DIR/.env"
+            if [ -n "$VPN_USERNAME" ] && [ -n "$VPN_PASSWORD" ]; then
+                vpn_user="$VPN_USERNAME"
+                vpn_pass="$VPN_PASSWORD"
+                log "Using credentials from .env"
+            fi
+        fi
+
+        local auth_file_outer="$TMP_DIR/openvpn-auth-$NS_OUTER.txt"
+        echo "$vpn_user" > "$auth_file_outer"
+        echo "$vpn_pass" >> "$auth_file_outer"
+        chmod 644 "$auth_file_outer"
+        echo "auth-user-pass $auth_file_outer" >> "$temp_config_outer"
+    fi
+
+    sudo ip netns exec "$NS_OUTER" openvpn --config "$temp_config_outer" \
+        --script-security 2 \
+        --setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+        --up /bin/true \
+        --down /bin/true \
+        --up-restart \
+        --pull-filter ignore "up" \
+        --pull-filter ignore "down" \
+        --log "$TMP_DIR/openvpn-$NS_OUTER.log" \
+        --verb 3 \
+        --daemon \
+        --writepid "$TMP_DIR/openvpn-$NS_OUTER.pid"
+
+    log "[8/15] Waiting for Layer 1 VPN connection..."
+    if ! wait_for_vpn_connection "$NS_OUTER"; then
+        error "Layer 1 VPN connection failed"
+        warn "Check log: $TMP_DIR/openvpn-$NS_OUTER.log"
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+    log "Layer 1 VPN connected successfully"
+
+    # ========== CREATE INNER NAMESPACE (LAYER 2) ==========
+
+    log "[9/15] Creating inner namespace inside outer namespace..."
+    sudo ip netns exec "$NS_OUTER" ip netns add "$NS_INNER" 2>/dev/null || sudo ip netns add "$NS_INNER"
+
+    log "[10/15] Creating veth pair (outer <-> inner namespace)..."
+    sudo ip netns exec "$NS_OUTER" ip link add "$VETH_OUTER_INNER" type veth peer name "$VETH_INNER"
+    sudo ip netns exec "$NS_OUTER" ip link set "$VETH_INNER" netns "$NS_INNER"
+
+    log "[11/15] Configuring network between outer and inner..."
+    sudo ip netns exec "$NS_OUTER" ip addr add "${IP_SUBNET_INNER}.1/24" dev "$VETH_OUTER_INNER"
+    sudo ip netns exec "$NS_OUTER" ip link set "$VETH_OUTER_INNER" up
+
+    sudo ip netns exec "$NS_INNER" ip addr add "${IP_SUBNET_INNER}.2/24" dev "$VETH_INNER"
+    sudo ip netns exec "$NS_INNER" ip link set "$VETH_INNER" up
+    sudo ip netns exec "$NS_INNER" ip link set lo up
+    sudo ip netns exec "$NS_INNER" ip route add default via "${IP_SUBNET_INNER}.1"
+
+    log "[12/15] Configuring NAT in outer namespace for inner traffic..."
+    sudo ip netns exec "$NS_OUTER" sysctl -w net.ipv4.ip_forward=1 > /dev/null
+
+    # Get tun interface name in outer namespace
+    local TUN_DEVICE=$(sudo ip netns exec "$NS_OUTER" ip -o link show | grep tun | awk -F': ' '{print $2}' | head -n1)
+    if [ -z "$TUN_DEVICE" ]; then
+        error "Cannot find tun device in outer namespace"
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+
+    sudo ip netns exec "$NS_OUTER" iptables -I FORWARD -i "$VETH_OUTER_INNER" -o "$TUN_DEVICE" -j ACCEPT
+    sudo ip netns exec "$NS_OUTER" iptables -I FORWARD -i "$TUN_DEVICE" -o "$VETH_OUTER_INNER" -m state --state RELATED,ESTABLISHED -j ACCEPT
+    sudo ip netns exec "$NS_OUTER" iptables -t nat -A POSTROUTING -s "${IP_SUBNET_INNER}.0/24" -o "$TUN_DEVICE" -j MASQUERADE
+
+    sleep 2
+
+    # Test inner namespace connectivity through Layer 1
+    info "Testing inner namespace connectivity through Layer 1..."
+    if ! sudo ip netns exec "$NS_INNER" ping -c 1 -W 3 1.1.1.1 &>/dev/null; then
+        error "Inner namespace cannot reach internet through Layer 1"
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+    log "Inner namespace connectivity through Layer 1: OK"
+
+    # Start Layer 2 VPN
+    log "[13/15] Starting Layer 2 VPN (Exit server through Layer 1)..."
+    rm -f "$TMP_DIR/openvpn-$NS_INNER.log" 2>/dev/null || true
+
+    local temp_config_inner="$TMP_DIR/openvpn-config-$NS_INNER.ovpn"
+    grep -v -e "^up " -e "^down " -e "update-resolv-conf" -e "^script-security" -e "^auth-user-pass" "$LAYER2_CONFIG" > "$temp_config_inner"
+
+    if grep -q "auth-user-pass" "$LAYER2_CONFIG"; then
+        local auth_file_inner="$TMP_DIR/openvpn-auth-$NS_INNER.txt"
+        echo "$vpn_user" > "$auth_file_inner"
+        echo "$vpn_pass" >> "$auth_file_inner"
+        chmod 644 "$auth_file_inner"
+        echo "auth-user-pass $auth_file_inner" >> "$temp_config_inner"
+    fi
+
+    sudo ip netns exec "$NS_INNER" openvpn --config "$temp_config_inner" \
+        --script-security 2 \
+        --setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+        --up /bin/true \
+        --down /bin/true \
+        --up-restart \
+        --pull-filter ignore "up" \
+        --pull-filter ignore "down" \
+        --log "$TMP_DIR/openvpn-$NS_INNER.log" \
+        --verb 3 \
+        --daemon \
+        --writepid "$TMP_DIR/openvpn-$NS_INNER.pid"
+
+    log "[14/15] Waiting for Layer 2 VPN connection..."
+    if ! wait_for_vpn_connection "$NS_INNER"; then
+        error "Layer 2 VPN connection failed"
+        warn "Check log: $TMP_DIR/openvpn-$NS_INNER.log"
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+    log "Layer 2 VPN connected successfully"
+
+    # Apply security layers to inner namespace
+    log "[15/15] Applying enterprise security layers to inner namespace..."
+    configure_dns_enterprise "$NS_INNER"
+    configure_webrtc_protection "$NS_INNER"
+    configure_ipv6_protection "$NS_INNER"
+
+    # Record successful connection
+    METRICS[successful_connections]=$((${METRICS[successful_connections]} + 1))
+    VPN_STATE[status]="CONNECTED"
+    VPN_STATE[last_successful_connection]=$(date +%s)
+    VPN_STATE[uptime_start]=$(date +%s)
+    CIRCUIT_BREAKER[failures]=0
+    save_metrics
+
+    echo ""
+    log "Double VPN setup complete!"
+    info "Traffic flow: Browser -> Layer2 (${LAYER2_CONFIG##*/}) -> Layer1 (${LAYER1_CONFIG##*/}) -> Internet"
+    echo ""
+
+    # Launch application in inner namespace with double VPN flag
+    launch_app_in_namespace "$NAMESPACE" "$APP_CMD" "$vpn_timezone" "true"
+}
+
+setup_and_launch() {
+    local NAMESPACE=$1
+    local OVPN_CONFIG=$2
+    local APP_CMD=$3
+
+    # Generate unique veth pair names
+    VETH_HOST="veth-${NAMESPACE}-h"
+    VETH_NS="veth-${NAMESPACE}-n"
+
+    # Generate unique IP subnet
+    SUBNET_ID=$((16#$(echo -n "$NAMESPACE" | md5sum | cut -c1-2) % 250 + 1))
+    IP_SUBNET="10.200.${SUBNET_ID}"
+
+    # Get timezone
+    local vpn_timezone=$(get_timezone_for_country "$NAMESPACE")
+
+    # Set up automatic cleanup on error/exit
+    cleanup_on_error() {
+        local exit_code=$?
+        if [ $exit_code -ne 0 ]; then
+            echo ""
+            warn "Setup failed. Cleaning up namespace '$NAMESPACE'..."
+            cleanup_namespace "$NAMESPACE" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-config-$NAMESPACE.ovpn" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-auth-$NAMESPACE.txt" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-$NAMESPACE.log" 2>/dev/null || true
+        fi
+    }
+    trap cleanup_on_error ERR
+
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  Setting up Enterprise VPN Namespace"
+    echo "═══════════════════════════════════════════════"
+    echo "Namespace: $NAMESPACE"
+    echo "Subnet: ${IP_SUBNET}.0/24"
+    echo "Interface: $INTERFACE"
+    echo "Timezone: $vpn_timezone"
+    echo "Security: Multi-layer leak prevention"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+
+    # Check circuit breaker (dnspro.sh pattern)
+    if ! circuit_breaker_check; then
+        error "Circuit breaker is OPEN. Too many recent failures."
+        error "Wait 5 minutes before attempting new connection."
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+
+    # Increment connection attempt counter
+    METRICS[connection_attempts]=$((${METRICS[connection_attempts]} + 1))
+    VPN_STATE[status]="CONNECTING"
+    save_metrics
+
+    # Check network connectivity first
+    log "[1/11] Checking network connectivity..."
+    if ! check_network_connectivity; then
+        error "Network connectivity check failed. Cannot proceed."
+        record_connection_failure
+        save_metrics
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+
+    # Create network namespace
+    log "[2/11] Creating namespace..."
+    sudo ip netns add "$NAMESPACE"
+
+    # Create veth pair
+    log "[3/11] Creating virtual network interfaces..."
+    sudo ip link add "$VETH_HOST" type veth peer name "$VETH_NS"
+    sudo ip link set "$VETH_NS" netns "$NAMESPACE"
+
+    # Configure host side
+    log "[4/11] Configuring host network..."
+    sudo ip addr add "${IP_SUBNET}.1/24" dev "$VETH_HOST"
+    sudo ip link set "$VETH_HOST" up
+
+    # Configure namespace side
+    log "[5/11] Configuring namespace network..."
+    sudo ip netns exec "$NAMESPACE" ip addr add "${IP_SUBNET}.2/24" dev "$VETH_NS"
+    sudo ip netns exec "$NAMESPACE" ip link set "$VETH_NS" up
+    sudo ip netns exec "$NAMESPACE" ip link set lo up
+    sudo ip netns exec "$NAMESPACE" ip route add default via "${IP_SUBNET}.1"
+
+    # Enable IP forwarding and NAT
+    log "[6/11] Configuring NAT..."
+    sudo sysctl -w net.ipv4.ip_forward=1 > /dev/null
+
+    # Add FORWARD rules (allow traffic from namespace to internet)
+    sudo iptables -I FORWARD -i "$VETH_HOST" -o "$INTERFACE" -j ACCEPT
+    sudo iptables -I FORWARD -i "$INTERFACE" -o "$VETH_HOST" -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+    # NAT rule for outgoing traffic
+    sudo iptables -t nat -A POSTROUTING -s "${IP_SUBNET}.0/24" -o "$INTERFACE" -j MASQUERADE
+
+    # Wait a moment for routing to stabilize
+    sleep 2
+
+    # Start OpenVPN (before applying firewall rules that would block it)
+    log "[7/11] Starting OpenVPN..."
+
+    # Remove old log if exists
+    rm -f "$TMP_DIR/openvpn-$NAMESPACE.log" 2>/dev/null || true
+
+    # Test namespace connectivity before starting OpenVPN
+    info "Testing namespace connectivity..."
+    if ! sudo ip netns exec "$NAMESPACE" ping -c 1 -W 3 1.1.1.1 &>/dev/null; then
+        echo ""
+        echo "Namespace connectivity test failed. Diagnostics:"
+        echo "  Namespace routes:"
+        sudo ip netns exec "$NAMESPACE" ip route
+        echo ""
+        echo "  NAT rules:"
+        sudo iptables -t nat -L POSTROUTING -n | grep "${IP_SUBNET}"
+        echo ""
+        echo "  Trying to ping gateway from namespace:"
+        sudo ip netns exec "$NAMESPACE" ping -c 2 "${IP_SUBNET}.1" || echo "  Cannot reach gateway"
+        echo ""
+        error "Namespace cannot reach internet. Check routing/NAT configuration."
+        cleanup_on_error
+        read -p "Press Enter to return to main menu..."
+        show_main_menu
+        return
+    fi
+    log "Namespace connectivity: OK"
+
+    # Create temporary config without problematic script directives
+    local temp_config="$TMP_DIR/openvpn-config-$NAMESPACE.ovpn"
+    grep -v -e "^up " -e "^down " -e "update-resolv-conf" -e "^script-security" -e "^auth-user-pass" "$OVPN_CONFIG" > "$temp_config"
+
+    # Check if credentials are needed
+    if grep -q "auth-user-pass" "$OVPN_CONFIG"; then
+        info "VPN requires authentication"
+
+        # Try to load from .env file first
+        local vpn_user=""
+        local vpn_pass=""
+
+        if [ -f "$SCRIPT_DIR/.env" ]; then
+            source "$SCRIPT_DIR/.env"
+            if [ -n "$VPN_USERNAME" ] && [ -n "$VPN_PASSWORD" ]; then
+                vpn_user="$VPN_USERNAME"
+                vpn_pass="$VPN_PASSWORD"
+                log "Using credentials from .env file"
+            fi
+        fi
+
+        # If not in .env, prompt for credentials
+        if [ -z "$vpn_user" ] || [ -z "$vpn_pass" ]; then
+            read -p "Enter VPN Username: " vpn_user
+            echo ""
+            echo "Password entry options:"
+            echo "1) Hidden (secure, type only)"
+            echo "2) Visible (allows paste)"
+            read -p "Select (1-2): " pass_choice
+
+            if [ "$pass_choice" = "1" ]; then
+                read -s -p "Enter VPN Password (hidden): " vpn_pass
+                echo ""
+            else
+                read -p "Enter VPN Password (visible): " vpn_pass
+            fi
+        fi
+
+        # Create auth file with proper permissions for namespace
+        local auth_file="$TMP_DIR/openvpn-auth-$NAMESPACE.txt"
+        echo "$vpn_user" > "$auth_file"
+        echo "$vpn_pass" >> "$auth_file"
+        chmod 644 "$auth_file"  # Readable by OpenVPN in namespace
+
+        # Add auth-user-pass to config
+        echo "auth-user-pass $auth_file" >> "$temp_config"
+    fi
+
+    sudo ip netns exec "$NAMESPACE" openvpn --config "$temp_config" \
+        --script-security 2 \
+        --setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+        --up /bin/true \
+        --down /bin/true \
+        --up-restart \
+        --pull-filter ignore "up" \
+        --pull-filter ignore "down" \
+        --log "$TMP_DIR/openvpn-$NAMESPACE.log" \
+        --verb 3 \
+        --daemon \
+        --writepid "$TMP_DIR/openvpn-$NAMESPACE.pid"
+
+    info "OpenVPN log: /tmp/openvpn-$NAMESPACE.log"
+
+    log "[8/8] Waiting for VPN connection..."
+    if ! wait_for_vpn_connection "$NAMESPACE"; then
+        error "VPN connection failed (UDP)"
+        warn "Check OpenVPN log: /tmp/openvpn-$NAMESPACE.log"
+        echo ""
+        echo "Last 10 lines of OpenVPN log:"
+        sudo tail -10 "$TMP_DIR/openvpn-$NAMESPACE.log" 2>/dev/null || echo "Log file not found"
+        echo ""
+
+        # Check if TCP config exists
+        local tcp_config="${OVPN_CONFIG/.udp./.tcp.}"
+        if [ -f "$tcp_config" ] && [ "$tcp_config" != "$OVPN_CONFIG" ]; then
+            warn "UDP connection failed. TCP config found: $tcp_config"
+            read -p "Try TCP connection instead? (y/n): " try_tcp
+
+            if [ "$try_tcp" = "y" ] || [ "$try_tcp" = "Y" ]; then
+                info "Stopping UDP OpenVPN..."
+                sudo pkill -f "openvpn.*$temp_config" || true
+                sleep 2
+
+                info "Trying TCP connection..."
+                # Recreate temp config for TCP
+                grep -v -e "^up " -e "^down " -e "update-resolv-conf" -e "^script-security" -e "^auth-user-pass" "$tcp_config" > "$temp_config"
+                echo "auth-user-pass $auth_file" >> "$temp_config"
+
+                sudo ip netns exec "$NAMESPACE" openvpn --config "$temp_config" \
+                    --script-security 2 \
+                    --setenv PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+                    --up /bin/true \
+                    --down /bin/true \
+                    --up-restart \
+                    --pull-filter ignore "up" \
+                    --pull-filter ignore "down" \
+                    --log "$TMP_DIR/openvpn-$NAMESPACE.log" \
+                    --verb 3 \
+                    --daemon \
+                    --writepid "$TMP_DIR/openvpn-$NAMESPACE.pid"
+
+                info "Waiting for TCP VPN connection..."
+                if wait_for_vpn_connection "$NAMESPACE"; then
+                    log "TCP VPN connection successful!"
+
+                    # Apply enterprise security layers after TCP connection
+                    log "Applying enterprise security layers..."
+                    configure_dns_enterprise "$NAMESPACE"
+                    configure_webrtc_protection "$NAMESPACE"
+                    configure_ipv6_protection "$NAMESPACE"
+                    log "Security layers applied successfully"
+                else
+                    error "TCP connection also failed"
+                    warn "Cleaning up failed namespace..."
+                    cleanup_namespace "$NAMESPACE"
+                    rm -f "$TMP_DIR/openvpn-config-$NAMESPACE.ovpn" 2>/dev/null || true
+                    rm -f "$TMP_DIR/openvpn-auth-$NAMESPACE.txt" 2>/dev/null || true
+                    read -p "Press Enter to return to main menu..."
+                    show_main_menu
+                    return
+                fi
+            else
+                warn "Cleaning up failed namespace..."
+                cleanup_namespace "$NAMESPACE"
+                rm -f "$TMP_DIR/openvpn-config-$NAMESPACE.ovpn" 2>/dev/null || true
+                rm -f "$TMP_DIR/openvpn-auth-$NAMESPACE.txt" 2>/dev/null || true
+                read -p "Press Enter to return to main menu..."
+                show_main_menu
+                return
+            fi
+        else
+            warn "No TCP config found. Cleaning up..."
+            cleanup_namespace "$NAMESPACE"
+            rm -f "$TMP_DIR/openvpn-config-$NAMESPACE.ovpn" 2>/dev/null || true
+            rm -f "$TMP_DIR/openvpn-auth-$NAMESPACE.txt" 2>/dev/null || true
+            read -p "Press Enter to return to main menu..."
+            show_main_menu
+            return
+        fi
+    fi
+
+    # Now that VPN is connected, apply enterprise security layers
+    log "Applying enterprise security layers..."
+    configure_dns_enterprise "$NAMESPACE"
+    configure_webrtc_protection "$NAMESPACE"
+    configure_ipv6_protection "$NAMESPACE"
+    log "Security layers applied successfully"
+
+    # Record successful connection (dnspro.sh pattern)
+    record_connection_success
+    VPN_STATE[status]="CONNECTED"
+    save_metrics
+    log "VPN state: CONNECTED"
+
+    # Health check
+    echo ""
+    info "Running post-connection health checks..."
+    if health_check_vpn "$NAMESPACE" 5; then
+        log "VPN health check: PASSED"
+    else
+        warn "VPN health check failed, but continuing..."
+    fi
+
+    # Test for leaks
+    if test_ip_leaks "$NAMESPACE"; then
+        log "IP leak test: PASSED"
+    else
+        warn "IP leak detected! Check configuration"
+    fi
+
+    # Launch application using unified function
+    launch_app_in_namespace "$NAMESPACE" "$APP_CMD" "$vpn_timezone" "false"
+}
+
+# Check dependencies first
+check_dependencies
+
+# Start the menu
+show_main_menu

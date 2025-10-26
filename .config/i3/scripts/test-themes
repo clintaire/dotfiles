@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Test all Omarchy themes in i3
+THEMES_DIR="$HOME/.local/share/omarchy/themes"
+
+echo "Testing all i3 themes..."
+echo "========================"
+
+for theme_dir in "$THEMES_DIR"/*; do
+    if [ -d "$theme_dir" ]; then
+        theme_name=$(basename "$theme_dir")
+        i3_conf="$theme_dir/i3.conf"
+
+        echo ""
+        echo "Theme: $theme_name"
+        echo "-------------------"
+
+        if [ ! -f "$i3_conf" ]; then
+            echo "  ❌ ERROR: i3.conf missing!"
+            continue
+        fi
+
+        # Check for all required bar color variables
+        errors=0
+        for var in bg fg separator focused_bg focused_fg active_bg active_fg inactive_bg inactive_fg urgent_bg urgent_fg binding_bg binding_fg; do
+            if ! grep -q "set \$bar_$var" "$i3_conf"; then
+                echo "  ❌ ERROR: Missing \$bar_$var"
+                errors=$((errors + 1))
+            else
+                # Check if it has a hex value
+                value=$(grep "set \$bar_$var" "$i3_conf" | awk '{print $3}')
+                if [[ ! $value =~ ^#[0-9a-fA-F]{6}$ ]]; then
+                    echo "  ⚠️  WARNING: \$bar_$var has invalid hex: $value"
+                    errors=$((errors + 1))
+                fi
+            fi
+        done
+
+        # Check for window color definitions
+        if ! grep -q "client.focused" "$i3_conf"; then
+            echo "  ❌ ERROR: Missing window color definitions"
+            errors=$((errors + 1))
+        fi
+
+        # Check for wallpaper directory
+        if [ ! -d "$theme_dir/backgrounds" ]; then
+            echo "  ⚠️  WARNING: No backgrounds directory"
+        else
+            wallpaper_count=$(find "$theme_dir/backgrounds" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) | wc -l)
+            if [ "$wallpaper_count" -eq 0 ]; then
+                echo "  ⚠️  WARNING: No wallpapers in backgrounds/"
+            else
+                echo "  ✓ Found $wallpaper_count wallpaper(s)"
+            fi
+        fi
+
+        if [ $errors -eq 0 ]; then
+            echo "  ✓ All checks passed!"
+        else
+            echo "  ❌ Found $errors error(s)"
+        fi
+    fi
+done
+
+echo ""
+echo "========================"
+echo "Theme testing complete!"

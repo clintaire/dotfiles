@@ -1,0 +1,2 @@
+#!/bin/sh
+feh --no-fehbg --bg-fill '/home/cli/.local/share/omarchy/themes/everforest/backgrounds/1-everforest.jpg' 

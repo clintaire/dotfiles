@@ -1,0 +1,359 @@
+#!/bin/bash
+
+# Export Omarchy i3 Setup
+# This script exports all Omarchy i3-related configurations for use on other systems
+
+set -e
+
+VERSION="1.0.0"
+EXPORT_DIR="/tmp/omarchy-i3-export"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+OUTPUT_ZIP="$HOME/.config/i3/omarchy-i3-setup-${TIMESTAMP}.zip"
+
+echo "========================================="
+echo "  Omarchy i3 Setup Export Tool v${VERSION}"
+echo "========================================="
+echo ""
+
+# Clean up old export directory
+if [ -d "$EXPORT_DIR" ]; then
+    rm -rf "$EXPORT_DIR"
+fi
+
+mkdir -p "$EXPORT_DIR"
+
+echo "[1/7] Copying i3 configuration..."
+mkdir -p "$EXPORT_DIR/.config/i3"
+cp -r ~/.config/i3/* "$EXPORT_DIR/.config/i3/"
+
+echo "[2/7] Copying i3status configuration..."
+mkdir -p "$EXPORT_DIR/.config/i3status"
+if [ -f ~/.config/i3status/config ]; then
+    cp ~/.config/i3status/config "$EXPORT_DIR/.config/i3status/"
+fi
+
+echo "[3/7] Copying rofi configuration..."
+mkdir -p "$EXPORT_DIR/.config/rofi"
+cp -r ~/.config/rofi/* "$EXPORT_DIR/.config/rofi/"
+
+echo "[4/7] Copying Omarchy theme system..."
+mkdir -p "$EXPORT_DIR/.local/share/omarchy"
+cp -r ~/.local/share/omarchy/themes "$EXPORT_DIR/.local/share/omarchy/"
+
+mkdir -p "$EXPORT_DIR/.config/omarchy"
+cp -r ~/.config/omarchy/* "$EXPORT_DIR/.config/omarchy/"
+
+echo "[5/7] Copying additional i3 enhancements..."
+# Copy picom config if exists
+if [ -f ~/.config/picom/picom.conf ] || [ -f ~/.config/picom.conf ]; then
+    mkdir -p "$EXPORT_DIR/.config/picom"
+    [ -f ~/.config/picom/picom.conf ] && cp ~/.config/picom/picom.conf "$EXPORT_DIR/.config/picom/"
+    [ -f ~/.config/picom.conf ] && cp ~/.config/picom.conf "$EXPORT_DIR/.config/"
+fi
+
+# Copy feh config if exists
+if [ -f ~/.fehbg ]; then
+    cp ~/.fehbg "$EXPORT_DIR/"
+fi
+
+echo "[6/7] Creating installation script..."
+cat > "$EXPORT_DIR/install.sh" << 'INSTALL_SCRIPT'
+#!/bin/bash
+
+# Omarchy i3 Setup Installer
+# Installs the exported Omarchy i3 configuration
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "========================================="
+echo "  Omarchy i3 Setup Installer"
+echo "========================================="
+echo ""
+echo "This will install:"
+echo "  - i3 window manager config"
+echo "  - i3status config"
+echo "  - rofi launcher config"
+echo "  - 12 beautiful themes"
+echo "  - Theme cycling system"
+echo "  - Helper scripts"
+echo ""
+echo "Your existing configs will be backed up to:"
+echo "  ~/.config/backup-$(date +%Y%m%d_%H%M%S)/"
+echo ""
+read -p "Do you want to continue? (y/N): " -n 1 -r
+echo ""
+
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
+BACKUP_DIR="$HOME/.config/backup-$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+
+echo ""
+echo "[1/5] Backing up existing configs..."
+[ -d ~/.config/i3 ] && cp -r ~/.config/i3 "$BACKUP_DIR/" && echo "  ✓ i3 backed up"
+[ -d ~/.config/i3status ] && cp -r ~/.config/i3status "$BACKUP_DIR/" && echo "  ✓ i3status backed up"
+[ -d ~/.config/rofi ] && cp -r ~/.config/rofi "$BACKUP_DIR/" && echo "  ✓ rofi backed up"
+[ -d ~/.config/omarchy ] && cp -r ~/.config/omarchy "$BACKUP_DIR/" && echo "  ✓ omarchy backed up"
+[ -d ~/.local/share/omarchy ] && cp -r ~/.local/share/omarchy "$BACKUP_DIR/" && echo "  ✓ omarchy themes backed up"
+
+echo ""
+echo "[2/5] Installing configuration files..."
+cp -r "$SCRIPT_DIR/.config/"* ~/.config/
+cp -r "$SCRIPT_DIR/.local/share/"* ~/.local/share/
+[ -f "$SCRIPT_DIR/.fehbg" ] && cp "$SCRIPT_DIR/.fehbg" ~/
+
+echo ""
+echo "[3/5] Setting up symlinks..."
+# Recreate theme symlinks
+ln -nsf ~/.local/share/omarchy/themes/everforest ~/.config/omarchy/current/theme
+
+echo ""
+echo "[4/5] Making scripts executable..."
+chmod +x ~/.config/i3/scripts/*
+chmod +x ~/.config/rofi/scripts/*
+
+echo ""
+echo "[5/5] Checking dependencies..."
+MISSING_DEPS=()
+
+command -v i3 >/dev/null 2>&1 || MISSING_DEPS+=("i3-wm")
+command -v i3status >/dev/null 2>&1 || MISSING_DEPS+=("i3status")
+command -v rofi >/dev/null 2>&1 || MISSING_DEPS+=("rofi")
+command -v feh >/dev/null 2>&1 || MISSING_DEPS+=("feh")
+command -v picom >/dev/null 2>&1 || MISSING_DEPS+=("picom")
+
+if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
+    echo ""
+    echo "⚠️  Missing optional dependencies:"
+    for dep in "${MISSING_DEPS[@]}"; do
+        echo "  - $dep"
+    done
+    echo ""
+    echo "Install commands for common distros:"
+    echo ""
+    echo "  Arch/Manjaro:"
+    echo "    sudo pacman -S i3-wm i3status rofi feh picom"
+    echo ""
+    echo "  Ubuntu/Debian:"
+    echo "    sudo apt install i3 i3status rofi feh picom"
+    echo ""
+    echo "  Fedora:"
+    echo "    sudo dnf install i3 i3status rofi feh picom"
+    echo ""
+fi
+
+echo ""
+echo "========================================="
+echo "  ✓ Installation Complete!"
+echo "========================================="
+echo ""
+echo "What's installed:"
+echo "  • 12 gorgeous themes (everforest, catppuccin, gruvbox, tokyo-night, etc.)"
+echo "  • i3 config with theme support"
+echo "  • rofi launcher with matching themes (JetBrainsMono NL 14px)"
+echo "  • Theme cycling system"
+echo "  • Helper scripts"
+echo ""
+echo "Usage:"
+echo "  • Cycle themes: Mod+Shift+R"
+echo "  • Open rofi: Mod+D"
+echo "  • Reload i3: Mod+Shift+C"
+echo ""
+echo "Scripts available:"
+echo "  • ~/.config/i3/scripts/theme-cycle"
+echo "  • ~/.config/rofi/scripts/test-themes"
+echo "  • ~/.config/rofi/scripts/generate-themes"
+echo ""
+echo "Log out and select i3 from your display manager, then log back in!"
+echo ""
+INSTALL_SCRIPT
+
+chmod +x "$EXPORT_DIR/install.sh"
+
+echo "[7/7] Creating README..."
+cat > "$EXPORT_DIR/README.md" << 'README'
+# Omarchy i3 Setup
+
+A beautiful, modern i3 window manager setup extracted from [Omarchy](https://omarchy.org).
+
+## Features
+
+- **12 gorgeous themes** that sync across i3, rofi, and wallpapers
+- **Dynamic theme switching** with a single keypress
+- **Beautiful rofi launcher** with JetBrainsMono NL font
+- **Smooth animations** with picom compositor
+- **Easy theme customization**
+
+## Themes Included
+
+1. Catppuccin (dark & light)
+2. Everforest
+3. Flexoki Light
+4. Gruvbox
+5. Kanagawa
+6. Matte Black
+7. Nord
+8. Osaka Jade
+9. Ristretto
+10. Rose Pine
+11. Tokyo Night
+
+## Installation
+
+```bash
+./install.sh
+```
+
+The installer will:
+- Back up your existing configs
+- Install all configuration files
+- Set up the theme system
+- Make scripts executable
+
+## Dependencies
+
+**Required:**
+- i3-wm
+- i3status
+- rofi
+
+**Optional (recommended):**
+- feh (wallpapers)
+- picom (compositor for transparency/shadows)
+- JetBrainsMono NL font
+
+## Usage
+
+### Keyboard Shortcuts
+
+- `Mod+Shift+R` - Cycle to next theme
+- `Mod+D` - Open rofi launcher
+- `Mod+Return` - Open terminal
+- `Mod+Shift+Q` - Close window
+- `Mod+Shift+C` - Reload i3 config
+
+### Scripts
+
+**Theme Management:**
+```bash
+~/.config/i3/scripts/theme-cycle        # Switch to next theme
+~/.config/rofi/scripts/test-themes      # Test all themes
+~/.config/rofi/scripts/generate-themes  # Regenerate rofi themes
+```
+
+## Customization
+
+### Adding Your Own Theme
+
+1. Create theme directory:
+```bash
+mkdir -p ~/.local/share/omarchy/themes/my-theme
+```
+
+2. Create `i3.conf` with color definitions:
+```bash
+# See existing themes for examples
+```
+
+3. Regenerate rofi themes:
+```bash
+~/.config/rofi/scripts/generate-themes
+```
+
+### Changing Font
+
+Edit `~/.config/rofi/scripts/generate-themes` and change:
+```bash
+font: "JetBrainsMono NL 14"
+```
+
+Then regenerate:
+```bash
+~/.config/rofi/scripts/generate-themes
+```
+
+## Structure
+
+```
+~/.config/
+├── i3/
+│   ├── config              # Main i3 config
+│   └── scripts/            # Helper scripts
+├── i3status/
+│   └── config              # Status bar config
+├── rofi/
+│   ├── config.rasi         # Rofi config
+│   └── scripts/            # Rofi utilities
+└── omarchy/
+    ├── current/theme →     # Symlink to active theme
+    └── themes/             # Symlinks to all themes
+
+~/.local/share/omarchy/
+└── themes/                 # Actual theme files
+    ├── everforest/
+    │   ├── i3.conf
+    │   ├── rofi.rasi
+    │   └── backgrounds/
+    └── ...
+```
+
+## Credits
+
+Based on [Omarchy](https://omarchy.org) by DHH.
+Exported and packaged for standalone use.
+
+## License
+
+MIT License
+README
+
+echo ""
+echo "========================================="
+echo "  Creating archive..."
+echo "========================================="
+
+# Create zip file
+cd "$EXPORT_DIR"
+zip -r "$OUTPUT_ZIP" . > /dev/null 2>&1
+
+echo ""
+echo "✓ Export complete!"
+echo ""
+echo "Archive created at:"
+echo "  $OUTPUT_ZIP"
+echo ""
+echo "Archive size: $(du -h "$OUTPUT_ZIP" | cut -f1)"
+echo ""
+echo "To use on another system:"
+echo "  1. Copy the zip file to the target system"
+echo "  2. unzip omarchy-i3-setup-*.zip"
+echo "  3. cd omarchy-i3-setup-*/"
+echo "  4. ./install.sh"
+echo ""
+
+# Clean up temp directory
+rm -rf "$EXPORT_DIR"
+
+echo "Would you like to install this setup on the current system now? (y/N): "
+read -n 1 -r INSTALL_NOW
+echo ""
+
+if [[ $INSTALL_NOW =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Extracting and running installer..."
+    TEMP_INSTALL="/tmp/omarchy-i3-install-$$"
+    mkdir -p "$TEMP_INSTALL"
+    unzip -q "$OUTPUT_ZIP" -d "$TEMP_INSTALL"
+    cd "$TEMP_INSTALL"
+    ./install.sh
+    cd - > /dev/null
+    rm -rf "$TEMP_INSTALL"
+fi
+
+echo ""
+echo "Done!"

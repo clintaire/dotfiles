@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+## Rofi Power Menu for i3
+## Provides lock, logout, reboot, shutdown options
+
+# Options
+shutdown=" Shutdown"
+reboot=" Reboot"
+lock=" Lock"
+suspend=" Suspend"
+logout=" Logout"
+
+# Rofi command
+rofi_cmd() {
+    rofi -dmenu \
+        -p "Power Menu" \
+        -mesg "System: $(hostname)" \
+        -theme-str 'window {width: 400px;}' \
+        -theme-str 'listview {lines: 5;}'
+}
+
+# Execute command
+run_cmd() {
+    case $1 in
+        --shutdown)
+            systemctl poweroff
+            ;;
+        --reboot)
+            systemctl reboot
+            ;;
+        --suspend)
+            # Lock before suspend
+            i3lock -c 000000 &
+            sleep 0.5
+            systemctl suspend
+            ;;
+        --lock)
+            i3lock -c 000000
+            ;;
+        --logout)
+            i3-msg exit
+            ;;
+    esac
+}
+
+# Show menu
+chosen="$(echo -e "$lock\n$logout\n$suspend\n$reboot\n$shutdown" | rofi_cmd)"
+
+# Run command
+case $chosen in
+    $shutdown)
+        run_cmd --shutdown
+        ;;
+    $reboot)
+        run_cmd --reboot
+        ;;
+    $lock)
+        run_cmd --lock
+        ;;
+    $suspend)
+        run_cmd --suspend
+        ;;
+    $logout)
+        run_cmd --logout
+        ;;
+esac

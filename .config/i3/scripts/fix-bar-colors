@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Fix ALL bar color variable references in i3 themes
+THEMES_DIR="$HOME/.local/share/omarchy/themes"
+
+echo "Fixing bar color variables in all themes..."
+
+for theme_dir in "$THEMES_DIR"/*; do
+    if [ -d "$theme_dir" ]; then
+        theme_name=$(basename "$theme_dir")
+        i3_conf="$theme_dir/i3.conf"
+
+        if [ ! -f "$i3_conf" ]; then
+            continue
+        fi
+
+        echo "Processing $theme_name..."
+
+        # First pass: collect all color definitions
+        declare -A colors
+        while IFS= read -r line; do
+            if [[ $line =~ ^set\ \$([a-z_0-9]+)\ +(\#[0-9a-fA-F]{6}) ]]; then
+                var_name="${BASH_REMATCH[1]}"
+                hex_value="${BASH_REMATCH[2]}"
+                colors[$var_name]="$hex_value"
+            fi
+        done < "$i3_conf"
+
+        # Second pass: replace bar color variable references
+        temp_file=$(mktemp)
+        while IFS= read -r line; do
+            if [[ $line =~ ^set\ \$bar_([a-z_]+)\ +\$([a-z_0-9]+) ]]; then
+                bar_var="bar_${BASH_REMATCH[1]}"
+                ref_var="${BASH_REMATCH[2]}"
+                if [ -n "${colors[$ref_var]}" ]; then
+                    # Use proper spacing
+                    printf "set \$%-20s %s\n" "$bar_var" "${colors[$ref_var]}"
+                else
+                    echo "$line"
+                fi
+            else
+                echo "$line"
+            fi
+        done < "$i3_conf" > "$temp_file"
+
+        mv "$temp_file" "$i3_conf"
+        echo "  ✓ Fixed $theme_name"
+    fi
+done
+
+echo "Done!"

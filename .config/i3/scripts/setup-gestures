@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Setup script for libinput-gestures on i3
+
+echo "Setting up touchpad gestures for i3..."
+
+# Check if libinput-gestures is installed
+if ! command -v libinput-gestures &> /dev/null; then
+    echo "Installing libinput-gestures..."
+
+    # Install from AUR
+    if command -v yay &> /dev/null; then
+        yay -S libinput-gestures
+    elif command -v paru &> /dev/null; then
+        paru -S libinput-gestures
+    else
+        echo "Error: Please install an AUR helper (yay or paru) first"
+        echo "Or manually install: https://github.com/bulletmark/libinput-gestures"
+        exit 1
+    fi
+fi
+
+# Add user to input group (required for libinput-gestures)
+echo "Adding user to 'input' group..."
+sudo gpasswd -a $USER input
+
+echo ""
+echo "✓ Setup complete!"
+echo ""
+echo "To enable gestures:"
+echo "  1. Log out and log back in (for group changes)"
+echo "  2. Run: libinput-gestures-setup autostart"
+echo "  3. Run: libinput-gestures-setup start"
+echo ""
+echo "To test gestures:"
+echo "  libinput-gestures -d"
+echo ""
+echo "Configuration file: ~/.config/libinput-gestures.conf"

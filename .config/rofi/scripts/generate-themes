@@ -1,0 +1,189 @@
+#!/bin/bash
+
+THEMES_DIR="/home/cli/.local/share/omarchy/themes"
+
+for theme_dir in "$THEMES_DIR"/*; do
+    if [ ! -d "$theme_dir" ]; then
+        continue
+    fi
+
+    theme_name=$(basename "$theme_dir")
+    i3_conf="$theme_dir/i3.conf"
+    rofi_theme="$theme_dir/rofi.rasi"
+
+    if [ ! -f "$i3_conf" ]; then
+        echo "Skipping $theme_name: no i3.conf found"
+        continue
+    fi
+
+    echo "Generating rofi theme for: $theme_name"
+
+    # Function to extract color from i3.conf by trying multiple variable names
+    get_color() {
+        local var_names=("$@")
+        local result=""
+
+        for var_name in "${var_names[@]}"; do
+            result=$(grep -m1 "set \$$var_name" "$i3_conf" | awk '{print $3}')
+            if [ -n "$result" ]; then
+                echo "$result"
+                return
+            fi
+        done
+
+        # Return empty if not found
+        echo ""
+    }
+
+    # Extract colors with fallback names for different themes
+    bg0=$(get_color "bg0" "base" "bg" "background")
+    bg1=$(get_color "bg1" "mantle" "bg_alt" "surface0")
+    bg2=$(get_color "bg2" "crust" "surface1")
+    bg3=$(get_color "bg3" "surface2" "brown" "overlay0")
+    bg4=$(get_color "bg4" "surface0" "overlay1")
+    fg=$(get_color "fg" "text" "foreground")
+    red=$(get_color "red")
+    orange=$(get_color "orange" "peach")
+    yellow=$(get_color "yellow")
+    green=$(get_color "green")
+    aqua=$(get_color "aqua" "teal" "cyan")
+    blue=$(get_color "blue" "sapphire")
+    purple=$(get_color "purple" "mauve" "lavender")
+
+    # Additional fallback: try to use accent color if green is not found
+    if [ -z "$green" ]; then
+        green=$(get_color "accent" "primary")
+    fi
+
+    # Use sensible defaults only if absolutely necessary
+    bg0=${bg0:-#1e1e2e}
+    bg1=${bg1:-#313244}
+    bg2=${bg2:-#45475a}
+    bg3=${bg3:-#585b70}
+    bg4=${bg4:-#6c7086}
+    fg=${fg:-#cdd6f4}
+    red=${red:-#f38ba8}
+    orange=${orange:-#fab387}
+    yellow=${yellow:-#f9e2af}
+    green=${green:-#a6e3a1}
+    aqua=${aqua:-#94e2d5}
+    blue=${blue:-#89b4fa}
+    purple=${purple:-#cba6f7}
+
+    # Debug output
+    echo "  bg0=$bg0 fg=$fg green=$green"
+
+    # Create rofi theme
+    cat > "$rofi_theme" << EOF
+/**
+ * $theme_name theme for Rofi
+ * Auto-syncs with Omarchy i3 theme
+ */
+
+* {
+    /* Theme colors */
+    bg0:       $bg0;
+    bg1:       $bg1;
+    bg2:       $bg2;
+    bg3:       $bg3;
+    bg4:       $bg4;
+    fg:        $fg;
+    red:       $red;
+    orange:    $orange;
+    yellow:    $yellow;
+    green:     $green;
+    aqua:      $aqua;
+    blue:      $blue;
+    purple:    $purple;
+
+    background-color: transparent;
+    text-color:       @fg;
+    font:             "JetBrainsMonoNL Nerd Font 18";
+}
+
+window {
+    background-color: @bg0;
+    border:           2px;
+    border-color:     @green;
+    border-radius:    8px;
+    padding:          20px;
+    width:            35%;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing:          10px;
+}
+
+inputbar {
+    background-color: @bg1;
+    border:           2px;
+    border-color:     @bg3;
+    border-radius:    4px;
+    padding:          8px 12px;
+    spacing:          8px;
+    text-color:       @fg;
+}
+
+prompt {
+    background-color: transparent;
+    text-color:       @green;
+}
+
+entry {
+    background-color: transparent;
+    text-color:       @fg;
+    placeholder:      "Search...";
+    placeholder-color: @bg4;
+}
+
+listview {
+    background-color: transparent;
+    lines:            8;
+    spacing:          4px;
+    scrollbar:        false;
+    padding:          4px 0px;
+}
+
+element {
+    background-color: transparent;
+    text-color:       @fg;
+    padding:          8px 12px;
+    border-radius:    4px;
+}
+
+element selected {
+    background-color: @green;
+    text-color:       @bg0;
+}
+
+element-text {
+    background-color: transparent;
+    text-color:       inherit;
+}
+
+element-icon {
+    background-color: transparent;
+    size:             1.2em;
+    margin:           0px 8px 0px 0px;
+}
+
+message {
+    background-color: @bg1;
+    border:           2px;
+    border-color:     @yellow;
+    border-radius:    4px;
+    padding:          8px;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:       @fg;
+}
+EOF
+
+    echo "  ✓ Created: $rofi_theme"
+done
+
+echo ""
+echo "Done! All rofi themes generated."

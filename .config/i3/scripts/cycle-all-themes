@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Cycle through all themes with i3-theme-cycle
+THEMES_DIR="$HOME/.local/share/omarchy/themes"
+
+echo "Cycling through all Omarchy themes..."
+echo "======================================"
+
+# Get list of themes
+themes=($(ls "$THEMES_DIR" | sort))
+
+for theme in "${themes[@]}"; do
+    echo ""
+    echo "Switching to: $theme"
+
+    # Set the theme
+    ln -nsf "$THEMES_DIR/$theme" "$HOME/.config/omarchy/current/theme"
+
+    # Apply theme colors to i3 config
+    ~/.local/bin/i3-theme-cycle > /dev/null 2>&1
+
+    # Give time to see the change
+    sleep 0.5
+done
+
+echo ""
+echo "======================================"
+echo "Cycled through all ${#themes[@]} themes!"
+echo "Current theme: $(basename $(readlink $HOME/.config/omarchy/current/theme))"
